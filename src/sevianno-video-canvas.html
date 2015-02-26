@@ -3,21 +3,19 @@
 
 <polymer-element name="sevianno-video-canvas" attributes="padding sourceVideo widthVideo heightVideo preloadVideo">
   <template>
-   <div id= "canvas-div" >
-	<div style="width: 620px; height: 445px; position: absolute; -moz-user-select: none;" class="canvas-container">
-		<canvas id="outer-canvas" height="445" width="620" style="border: 1px solid rgb(170, 170, 170); position: absolute; width: 620px; height: 445px; left: 0px; top: 0px; -moz-user-select: none; cursor: crosshair;" class="outer-canvas"></canvas>
+   <div id= "content-container" >
+	<div class="canvas-container">
+		<canvas id="outer-canvas" height={{heightVideo}}+{{padding}} width={{widthVideo}}+{{padding}} style="border: 1px solid rgb(170, 170, 170); position: absolute; width: 620px; height: 445px; left: 0px; top: 0px; -moz-user-select: none; cursor: crosshair;" class="outer-canvas"></canvas>
 	</div>
-	<div id="video_container">
- 	
- <video id="video_player" muted={{mutedVideo}} width={{widthVideo}} height={{heightVideo}} preload={{preloadVideo}} src={{sourceVideo}}  ></video> 
-
+	<div id="video-container">
+		<video id="video-player" width={{widthVideo}} height={{heightVideo}} preload={{preloadVideo}} src={{sourceVideo}}  ></video> 
 	</div>
-	 <div id="video-controls" class="{{theme}}">
-	<button type="button" id="playpause" class="play" on-click="{{playPause}}">Play</button>
+	<div id="video-controls">
+	<!-- <button type="button" id="playpause" class="play" on-click="{{playPause}}">Play</button>
 	<input type="range" id="seekbar" value="0">
 	<input type="range" id="volumebar" min="0" max="1" step="0.1" value="1">
-	<button type="button" id="fullscreen" on-click="{{fullscreen}}">Full-Screen</button>
-</div>
+	<button type="button" id="fullscreen" on-click="{{fullscreen}}">Full-Screen</button> -->
+	</div>
 	</div>
 <!-- 
     <core-icon-button
