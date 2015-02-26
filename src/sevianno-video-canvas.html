@@ -1,0 +1,66 @@
+<link rel="import" href="../components/polymer/polymer.html">
+<link rel="import" href="../components/core-icon-button/core-icon-button.html">
+
+<polymer-element name="sevianno-video-canvas" attributes="padding sourceVideo widthVideo heightVideo preloadVideo">
+  <template>
+   <div id= "canvas-div" >
+	<div style="width: 620px; height: 445px; position: absolute; -moz-user-select: none;" class="canvas-container">
+		<canvas id="outer-canvas" height="445" width="620" style="border: 1px solid rgb(170, 170, 170); position: absolute; width: 620px; height: 445px; left: 0px; top: 0px; -moz-user-select: none; cursor: crosshair;" class="outer-canvas"></canvas>
+	</div>
+	<div id="video_container">
+ 	
+ <video id="video_player" muted={{mutedVideo}} width={{widthVideo}} height={{heightVideo}} preload={{preloadVideo}} src={{sourceVideo}}  ></video> 
+
+	</div>
+	 <div id="video-controls" class="{{theme}}">
+	<button type="button" id="playpause" class="play" on-click="{{playPause}}">Play</button>
+	<input type="range" id="seekbar" value="0">
+	<input type="range" id="volumebar" min="0" max="1" step="0.1" value="1">
+	<button type="button" id="fullscreen" on-click="{{fullscreen}}">Full-Screen</button>
+</div>
+	</div>
+<!-- 
+    <core-icon-button
+      id="favicon"
+      icon="favorite"
+      on-tap="{{favoriteTapped}}">
+    </core-icon-button>
+ -->
+    <content></content>   
+  </template>
+	<script>
+		Polymer({
+		width: '320',
+		height: '240',
+		src:'http://golovin.de/ba/parking.mp4',
+		padding:'3px',
+		ready: function() {
+		
+		
+		},
+		playPause: function () {
+		if (this.video.paused == true) {
+		// Play the video
+		this.video.play();
+		// Update the button text to 'Pause'
+		this.$.playpause.innerHTML = "Pause";
+		} else {
+		// Pause the video
+		this.video.pause();
+		// Update the button text to 'Play'
+		this.$.playpause.innerHTML = "Play";
+		}
+		},
+		fullscreen: function () {
+		if (this.video.requestFullscreen) {
+		this.video.requestFullscreen();
+		} else if (this.video.mozRequestFullScreen) {
+		this.video.mozRequestFullScreen(); // Firefox
+		} else if (video.webkitRequestFullscreen) {
+		this.video.webkitRequestFullscreen(); // Chrome and Safari
+		}
+		},
+		
+		});
+	</script>
+</polymer-element>
