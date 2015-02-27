@@ -1,21 +1,21 @@
 <link rel="import" href="../components/polymer/polymer.html">
 <link rel="import" href="../components/core-icon-button/core-icon-button.html">
+<link rel="import" href="../bower_components/polymer/polymer.html">
 
-<polymer-element name="sevianno-video-canvas" attributes="padding sourceVideo widthVideo heightVideo preloadVideo">
+
+<polymer-element name="sevianno-video-canvas" attributes="pad sourceVideo widthVideo heightVideo preloadVideo">
   <template>
    <div id= "content-container" >
 	<div class="canvas-container">
-		<canvas id="outer-canvas" height={{heightVideo}}+{{padding}} width={{widthVideo}}+{{padding}} style="border: 1px solid rgb(170, 170, 170); position: absolute; width: 620px; height: 445px; left: 0px; top: 0px; -moz-user-select: none; cursor: crosshair;" class="outer-canvas"></canvas>
+		<canvas id="outer-canvas" height={{canvasHeight}} width={{canvasWidth}} style="border: 1px solid rgb(170, 170, 170);  left: 10px; top: 10px; -moz-user-select: none; cursor: crosshair;" class="outer-canvas"></canvas>
 	</div>
-	<div id="video-container">
-		<video id="video-player" width={{widthVideo}} height={{heightVideo}} preload={{preloadVideo}} src={{sourceVideo}}  ></video> 
+	<div id="video-container" style="margin-top:{{videoMarginTop}}px; display: block;">
+		<video id="video" width={{widthVideo}} height={{heightVideo}} preload={{preloadVideo}} src={{sourceVideo}} ></video> 
 	</div>
-	<div id="video-controls">
-	<!-- <button type="button" id="playpause" class="play" on-click="{{playPause}}">Play</button>
-	<input type="range" id="seekbar" value="0">
-	<input type="range" id="volumebar" min="0" max="1" step="0.1" value="1">
-	<button type="button" id="fullscreen" on-click="{{fullscreen}}">Full-Screen</button> -->
+	
 	</div>
+	<div id="video-controls" class="{{theme}}">
+		<button type="button" id="playpause" class="play" on-click="{{playPause}}">Play</button>
 	</div>
 <!-- 
     <core-icon-button
@@ -24,17 +24,23 @@
       on-tap="{{favoriteTapped}}">
     </core-icon-button>
  -->
-    <content></content>   
+
+
   </template>
+  <script src="fabric/dist/fabric.js"></script>
 	<script>
 		Polymer({
 		width: '320',
 		height: '240',
 		src:'http://golovin.de/ba/parking.mp4',
-		padding:'3px',
+		padding:'3',
 		ready: function() {
-		
-		
+		var video = this.video = this.$.video;
+		},
+		computed: {
+        canvasWidth: 'widthVideo/1 + pad/1',
+		canvasHeight: 'heightVideo/1 + pad/1',
+		videoMarginTop: 'heightVideo/(-1)- pad/1',
 		},
 		playPause: function () {
 		if (this.video.paused == true) {

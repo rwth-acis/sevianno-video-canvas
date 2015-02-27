@@ -6,15 +6,16 @@
 
     <!-- Importing Web Component's Polyfill -->
     <script src="bower_components/webcomponentsjs/webcomponents.min.js"></script>
+	
 
     <!-- Importing Custom Elements -->
-    <link rel="import" href="src/hello-world.html">
 	<link rel="import" href="src/sevianno-video-canvas.html">
+	<link rel="import" href="../bower_components/polymer/polymer.html">
 </head>
 <body>
 
     <!-- Using Custom Elements -->
-	<sevianno-video-canvas padding="3" sourceVideo="http://golovin.de/ba/parking.mp4"  widthVideo="640" heightVideo="300" preloadVideo="auto"></sevianno-video-canvas>
+	<sevianno-video-canvas pad="10" sourceVideo="http://golovin.de/ba/parking.mp4"  widthVideo="640" heightVideo="300" preloadVideo="auto"></sevianno-video-canvas>
 
 </body>
 </html>
