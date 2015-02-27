@@ -1,17 +1,18 @@
 <link rel="import" href="../components/polymer/polymer.html">
 <link rel="import" href="../components/core-icon-button/core-icon-button.html">
-<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/polymer/polymer.html">
 
 
 <polymer-element name="sevianno-video-canvas" attributes="pad sourceVideo widthVideo heightVideo preloadVideo">
   <template>
    <div id= "content-container" >
-	<div class="canvas-container">
-		<canvas id="outer-canvas" height={{canvasHeight}} width={{canvasWidth}} style="border: 1px solid rgb(170, 170, 170);  left: 10px; top: 10px; -moz-user-select: none; cursor: crosshair;" class="outer-canvas"></canvas>
-	</div>
-	<div id="video-container" style="margin-top:{{videoMarginTop}}px; display: block;">
+   <div id="video-container" style=" display: block; margin-top:{{videoMarginTop}}px;">
 		<video id="video" width={{widthVideo}} height={{heightVideo}} preload={{preloadVideo}} src={{sourceVideo}} ></video> 
 	</div>
+	<div class="canvas-container" style ="margin-top:{{canvasMarginTop}}px;" >
+		<canvas id="outer-canvas" height={{canvasHeight}} width={{canvasWidth}} style="border: 1px solid rgb(170, 170, 170);  left: 10px; top: 10px; -moz-user-select: none; cursor: crosshair;  " class="outer-canvas"></canvas>
+	</div>
+	
 	
 	</div>
 	<div id="video-controls" class="{{theme}}">
@@ -36,11 +37,16 @@
 		padding:'3',
 		ready: function() {
 		var video = this.video = this.$.video;
+		var canvas = this.__canvas = new fabric.Canvas('outer-canvas', {
+			isDrawingMode: true
+		});
 		},
 		computed: {
         canvasWidth: 'widthVideo/1 + pad/1',
 		canvasHeight: 'heightVideo/1 + pad/1',
-		videoMarginTop: 'heightVideo/(-1)- pad/1',
+		canvasMarginTop: 'heightVideo/(-1)- pad/1',
+		videoMarginTop: '3*pad'
+		
 		},
 		playPause: function () {
 		if (this.video.paused == true) {
