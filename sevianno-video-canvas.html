@@ -28,19 +28,19 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
-<link rel="import" href="../components/polymer/polymer.html">
-<link rel="import" href="../components/core-icon-button/core-icon-button.html">
+
+<!--<link rel="import" href="sevianno-video-canvas/bower_components/core-icon-button/core-icon-button.html">-->
 <link rel="import" href="bower_components/polymer/polymer.html">
 
 
 <polymer-element name="sevianno-video-canvas" attributes="pad sourceVideo widthVideo heightVideo preloadVideo">
   <template>
    <div id= "content-container" >
-   <div id="video-container" style=" display: block; margin-top:{{videoMarginTop}}px;">
+   <div id="video-container" style=" display: block;">
 		<video id="video" width={{widthVideo}} height={{heightVideo}} preload={{preloadVideo}} src={{sourceVideo}} ></video> 
 	</div>
 	<div class="canvas-container" style ="margin-top:{{canvasMarginTop}}px;" >
-		<canvas id="outer-canvas" height={{canvasHeight}} width={{canvasWidth}} style="border: 1px solid rgb(170, 170, 170);  left: 10px; top: 10px; -moz-user-select: none; cursor: crosshair;" class="outer-canvas"></canvas>
+		<canvas id="upper-canvas" height={{canvasHeight}} width={{canvasWidth}} style="border: 1px solid rgb(170, 170, 170);  left: 10px; top: 10px; -moz-user-select: none; cursor: crosshair;" class="upper-canvas"></canvas>
 	</div>
 	
 	
@@ -55,7 +55,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       on-tap="{{favoriteTapped}}">
     </core-icon-button>
  -->
-
+	<style>
+			@host {
+				* {
+					display: inline-block;
+					font-family: sans-serif;
+					font-size: 11px;
+				}
+			}
+			#video{
+			margin-left: {{videoMargin}}px;
+			}
+	</style>
 
   </template>
   <script src="fabric/dist/fabric.js"></script>
@@ -67,9 +78,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		src:'http://golovin.de/ba/parking.mp4',
 		padding:'3',
 		canvas:null,
-		ready: function() {
+		domReady: function() {
 		var video = this.video = this.$.video;
-		this.canvas = new fabric.Canvas('outer-canvas', {
+		this.canvas = new fabric.Canvas('upper-canvas', {
 			isDrawingMode: true
 		});
 			this.canvas.freeDrawingBrush.width = 10,
@@ -80,7 +91,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         canvasWidth: 'widthVideo/1 + pad/1',
 		canvasHeight: 'heightVideo/1 + pad/1',
 		canvasMarginTop: 'heightVideo/(-1)- pad/1',
-		videoMarginTop: '3*pad'
+		videoMargin: 'pad/2'
 		
 		},
 		playPause: function () {
@@ -88,6 +99,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		// Play the video
 		this.video.play();
 		console.log(this.canvas);
+		console.log(JSON.stringify(this.canvas));
 		// Update the button text to 'Pause'
 		this.$.playpause.innerHTML = "Pause";
 		} else {
@@ -105,7 +117,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		} else if (video.webkitRequestFullscreen) {
 		this.video.webkitRequestFullscreen(); // Chrome and Safari
 		}
-		},
+		}
 		
 		});
 	</script>
