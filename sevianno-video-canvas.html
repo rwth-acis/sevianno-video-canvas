@@ -1,3 +1,33 @@
+<!--
+Copyright (c) 2014 Advanced Community Information Systems (ACIS) Group, 
+Chair of Computer Science 5 (Databases & Information Systems), RWTH Aachen University, Germany
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the ACIS Group nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
 <link rel="import" href="../components/polymer/polymer.html">
 <link rel="import" href="../components/core-icon-button/core-icon-button.html">
 <link rel="import" href="bower_components/polymer/polymer.html">
@@ -10,7 +40,7 @@
 		<video id="video" width={{widthVideo}} height={{heightVideo}} preload={{preloadVideo}} src={{sourceVideo}} ></video> 
 	</div>
 	<div class="canvas-container" style ="margin-top:{{canvasMarginTop}}px;" >
-		<canvas id="outer-canvas" height={{canvasHeight}} width={{canvasWidth}} style="border: 1px solid rgb(170, 170, 170);  left: 10px; top: 10px; -moz-user-select: none; cursor: crosshair;  " class="outer-canvas"></canvas>
+		<canvas id="outer-canvas" height={{canvasHeight}} width={{canvasWidth}} style="border: 1px solid rgb(170, 170, 170);  left: 10px; top: 10px; -moz-user-select: none; cursor: crosshair;" class="outer-canvas"></canvas>
 	</div>
 	
 	
@@ -29,17 +59,22 @@
 
   </template>
   <script src="fabric/dist/fabric.js"></script>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
 	<script>
 		Polymer({
 		width: '320',
 		height: '240',
 		src:'http://golovin.de/ba/parking.mp4',
 		padding:'3',
+		canvas:null,
 		ready: function() {
 		var video = this.video = this.$.video;
-		var canvas = this.__canvas = new fabric.Canvas('outer-canvas', {
+		this.canvas = new fabric.Canvas('outer-canvas', {
 			isDrawingMode: true
 		});
+			this.canvas.freeDrawingBrush.width = 10,
+			this.canvas.freeDrawingBrush.color = '#FF0000',
+			console.log(this.canvas)
 		},
 		computed: {
         canvasWidth: 'widthVideo/1 + pad/1',
@@ -52,6 +87,7 @@
 		if (this.video.paused == true) {
 		// Play the video
 		this.video.play();
+		console.log(this.canvas);
 		// Update the button text to 'Pause'
 		this.$.playpause.innerHTML = "Pause";
 		} else {
