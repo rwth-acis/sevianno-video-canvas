@@ -31,6 +31,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 <!--<link rel="import" href="sevianno-video-canvas/bower_components/core-icon-button/core-icon-button.html">-->
 <link rel="import" href="bower_components/polymer/polymer.html">
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/fabric.js/1.4.13/fabric.min.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
 
 
 <polymer-element name="sevianno-video-canvas" attributes="pad sourceVideo widthVideo heightVideo preloadVideo">
@@ -39,13 +41,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
    <div id="video-container" style=" display: block;">
 		<video id="video" width={{widthVideo}} height={{heightVideo}} preload={{preloadVideo}} src={{sourceVideo}} ></video> 
 	</div>
-	<div class="canvas-container" style ="margin-top:{{canvasMarginTop}}px;" >
-		<canvas id="upper-canvas" height={{canvasHeight}} width={{canvasWidth}} style="border: 1px solid rgb(170, 170, 170);  left: 10px; top: 10px; -moz-user-select: none; cursor: crosshair;" class="upper-canvas"></canvas>
+	<div class="container" style ="margin-top:{{canvasMarginTop}}px;" >
+		<canvas id="c" height={{canvasHeight}} width={{canvasWidth}} style="border: 1px solid rgb(170, 170, 170);  left: 10px; top: 10px; -moz-user-select: none; cursor: crosshair;"></canvas>
+	</div>
+	
+
+	
 	</div>
 	
 	
 	</div>
-	<div id="video-controls" class="{{theme}}">
+	<div id="video-controls">
 		<button type="button" id="playpause" class="play" on-click="{{playPause}}">Play</button>
 	</div>
 <!-- 
@@ -69,8 +75,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	</style>
 
   </template>
-  <script src="fabric/dist/fabric.js"></script>
-  <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+  
+
 	<script>
 		Polymer({
 		width: '320',
@@ -80,7 +86,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		canvas:null,
 		domReady: function() {
 		var video = this.video = this.$.video;
-		this.canvas = new fabric.Canvas('upper-canvas', {
+		this.canvas = this.__canvas = new fabric.Canvas("c", {
 			isDrawingMode: true
 		});
 			this.canvas.freeDrawingBrush.width = 10,
