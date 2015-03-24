@@ -31,26 +31,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 <!--<link rel="import" href="sevianno-video-canvas/bower_components/core-icon-button/core-icon-button.html">-->
 <link rel="import" href="bower_components/polymer/polymer.html">
-<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/fabric.js/1.4.13/fabric.min.js"></script>
+
+
+<script type="text/javascript" src="bower_components/fabric/dist/fabric.js"></script>
 <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
 
 
 <polymer-element name="sevianno-video-canvas" attributes="pad sourceVideo widthVideo heightVideo preloadVideo">
   <template>
-   <div id= "content-container" >
-   <div id="video-container" style=" display: block;">
-		<video id="video" width={{widthVideo}} height={{heightVideo}} preload={{preloadVideo}} src={{sourceVideo}} ></video> 
-	</div>
-	<div class="container" style ="margin-top:{{canvasMarginTop}}px;" >
-		<canvas id="c" height={{canvasHeight}} width={{canvasWidth}} style="border: 1px solid rgb(170, 170, 170);  left: 10px; top: 10px; -moz-user-select: none; cursor: crosshair;"></canvas>
-	</div>
-	
 
-	
-	</div>
-	
-	
-	</div>
+		<canvas id="c" height={{canvasHeight}} width={{canvasWidth}} style="border: 1px solid rgb(170, 170, 170);  left: 10px; top: 10px; -moz-user-select: none; cursor: crosshair;"></canvas>
+		<!--<video id="video" width={{widthVideo}} height={{heightVideo}} preload={{preloadVideo}} src={{sourceVideo}} ></video> -->	
+
 	<div id="video-controls">
 		<button type="button" id="playpause" class="play" on-click="{{playPause}}">Play</button>
 	</div>
@@ -62,15 +54,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </core-icon-button>
  -->
 	<style>
-			@host {
-				* {
-					display: inline-block;
-					font-family: sans-serif;
-					font-size: 11px;
-				}
-			}
+			:host {
+				display: block;
+				}	
 			#video{
 			margin-left: {{videoMargin}}px;
+			margin-top:{{canvasMarginTop}}px;
 			}
 	</style>
 
@@ -78,7 +67,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   
 
 	<script>
-		Polymer({
+	 (function() {
+		'use strict';
+		Polymer('sevianno-video-canvas',{
+		// TODO: documentation like :https://github.com/GoogleWebComponents
 		width: '320',
 		height: '240',
 		src:'http://golovin.de/ba/parking.mp4',
@@ -89,10 +81,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		this.canvas = this.__canvas = new fabric.Canvas("c", {
 			isDrawingMode: true
 		});
-			this.canvas.freeDrawingBrush.width = 10,
-			this.canvas.freeDrawingBrush.color = '#FF0000',
-			console.log(this.canvas)
+			this.canvas.freeDrawingBrush.width = 10;
+			this.canvas.freeDrawingBrush.color = '#FF0000';
+			console.log(this.canvas);
 		},
+		
 		computed: {
         canvasWidth: 'widthVideo/1 + pad/1',
 		canvasHeight: 'heightVideo/1 + pad/1',
@@ -126,5 +119,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		}
 		
 		});
+		})();
 	</script>
 </polymer-element>
