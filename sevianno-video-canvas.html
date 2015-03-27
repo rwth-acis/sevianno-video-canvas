@@ -37,11 +37,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
 
 
-<polymer-element name="sevianno-video-canvas" attributes="pad sourceVideo widthVideo heightVideo preloadVideo">
+<polymer-element name="sevianno-video-canvas" attributes="paddingcanvas sourcevideo widthvideo heightvideo preloadvideo timevideo">
   <template>
 
 		<canvas id="c" height={{canvasHeight}} width={{canvasWidth}} style="border: 1px solid rgb(170, 170, 170);  left: 10px; top: 10px; -moz-user-select: none; cursor: crosshair;"></canvas>
-		<!--<video id="video" width={{widthVideo}} height={{heightVideo}} preload={{preloadVideo}} src={{sourceVideo}} ></video> -->	
+		<video id="video" width={{widthvideo}} height={{heightvideo}} preload={{preloadvideo}} src={{sourcevideo}} ></video> 	
 
 	<div id="video-controls">
 		<button type="button" id="playpause" class="play" on-click="{{playPause}}">Play</button>
@@ -67,37 +67,47 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   
 
 	<script>
-	 (function() {
-		'use strict';
-		Polymer('sevianno-video-canvas',{
+
+		Polymer({
 		// TODO: documentation like :https://github.com/GoogleWebComponents
-		width: '320',
-		height: '240',
-		src:'http://golovin.de/ba/parking.mp4',
-		padding:'3',
+		widthvideo: '320',
+		heightvideo: '240',
+		sourcevideo:'http://golovin.de/ba/parking.mp4',
+		paddingcanvas:'3',
 		canvas:null,
+		timevideo:0,
+		video:null,
 		domReady: function() {
-		var video = this.video = this.$.video;
+		this.video = this.$.video,
 		this.canvas = this.__canvas = new fabric.Canvas("c", {
 		
 			isDrawingMode: true
 		});
-			this.canvas.freeDrawingBrush.width = 10;
-			this.canvas.freeDrawingBrush.color = '#FF0000';
-			console.log(this.canvas);
+			this.canvas.freeDrawingBrush.width = 10,
+			this.canvas.freeDrawingBrush.color = '#FF0000',
+			console.log(this.canvas)
 		},
 		
 		computed: {
-        canvasWidth: 'widthVideo/1 + pad/1',
-		canvasHeight: 'heightVideo/1 + pad/1',
-		canvasMarginTop: 'heightVideo/(-1)- pad/1',
-		videoMargin: 'pad/2'
+        canvasWidth: 'widthvideo/1 + paddingcanvas/1',
+		canvasHeight: 'heightvideo/1 + paddingcanvas/1',
+		canvasMarginTop: 'heightvideo/1 - paddingcanvas/1',
+		videoMargin: 'paddingcanvas/2'
 		
 		},
+		timevideoChanged: function() {
+        // when the time of the video changes
+		if(this.video){
+		this.video.currentTime = this.timevideo;
+		this.video.play();
+		}
+      },
 		playPause: function () {
 		if (this.video.paused == true) {
 		// Play the video
+		this.video.currentTime = this.timevideo;
 		this.video.play();
+		
 		console.log(this.canvas);
 		console.log(JSON.stringify(this.canvas));
 		// Update the button text to 'Pause'
@@ -120,6 +130,5 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		}
 		
 		});
-		})();
 	</script>
 </polymer-element>

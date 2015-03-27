@@ -21,13 +21,14 @@
 
 
     <!-- Using Custom Elements -->
-	<sevianno-video-canvas id = "seviannoVideoCanvas" pad="100" sourceVideo="http://golovin.de/ba/parking.mp4"  widthVideo="640" heightVideo="300" preloadVideo="auto"></sevianno-video-canvas>
+	<sevianno-video-canvas id = "seviannoVideoCanvas" paddingcanvas="100" sourcevideo="http://golovin.de/ba/parking.mp4"  widthvideo="640" heightvideo="300" preloadvideo="auto" timevideo="10"></sevianno-video-canvas>
 
 
 	<div id="video-controls">
 		<button type="button" id="playpause" class="play">Play</button>
+		 <button onclick="changeTime();">Go To second 5</button>
 	</div>
-	<script>
+	<!--<script>
 		var canvas = null;
 		var video = this.video = this.$.video;
 		canvas = this.__canvas = new fabric.Canvas("c", {
@@ -37,6 +38,12 @@
 			canvas.freeDrawingBrush.color = '#FF0000';
 			console.log(canvas);
 		
+	</script>-->
+	<script>
+	var component = document.getElementById("seviannoVideoCanvas");
+	function changeTime() {
+	component.setAttribute('timevideo', 5);
+	}
 	</script>
 </body>
 </html>
