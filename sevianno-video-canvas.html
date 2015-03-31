@@ -56,11 +56,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	<style>
 			:host {
 				display: block;
-				}	
-			#video{
-			margin-left: {{videoMargin}}px;
-			margin-top:{{canvasMarginTop}}px;
+				float:right;
+				}
+			#content-container {
+				position: relative;
+				width: 500px;
+				clear: both;
 			}
+			canvas {
+				position: absolute;
+				height: 400px;
+				width: 500px;
+				top: 0px;
+				left: 0px;
+			}
+			video {
+				width: 500px;
+				position: absolute;
+				top: 20px;
+				left: 20px;
+			}
+			
 	</style>
 
   </template>
@@ -79,7 +95,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		video:null,
 		domReady: function() {
 		this.video = this.$.video,
-		this.canvas = this.__canvas = new fabric.Canvas("c", {
+		this.canvas = this.__canvas = new fabric.Canvas(this.$.c, {
 		
 			isDrawingMode: true
 		});
