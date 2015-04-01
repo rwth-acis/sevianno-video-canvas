@@ -35,7 +35,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 <script type="text/javascript" src="bower_components/fabric/dist/fabric.js"></script>
 <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+<!--
+`sevianno-video-canvas` is a web component that play videos and shows drawing annotations.
 
+##### Example
+<sevianno-video-canvas id = "seviannoVideoCanvas" 
+paddingcanvas="100" 
+sourcevideo="http://golovin.de/ba/parking.mp4"  
+widthvideo="640" 
+heightvideo="300" 
+preloadvideo="auto" 
+timevideo="10">
+</sevianno-video-canvas>
+
+The set of parameters is subject of change since all the properties of this component are not yet defined.
+
+@element sevianno-video-canvas
+@status alpha
+@source https://github.com/rwth-acis/sevianno-video-canvas
+@homepage //TODO Deploy on the cloud one example
+
+-->
 
 <polymer-element name="sevianno-video-canvas" attributes="paddingcanvas sourcevideo widthvideo heightvideo preloadvideo timevideo">
   <template>
@@ -43,16 +63,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		<canvas id="c" height={{canvasHeight}} width={{canvasWidth}} style="border: 1px solid rgb(170, 170, 170);  left: 10px; top: 10px; -moz-user-select: none; cursor: crosshair;"></canvas>
 		<video id="video" width={{widthvideo}} height={{heightvideo}} preload={{preloadvideo}} src={{sourcevideo}} ></video> 	
 
-	<div id="video-controls">
-		<button type="button" id="playpause" class="play" on-click="{{playPause}}">Play</button>
-	</div>
-<!-- 
-    <core-icon-button
-      id="favicon"
-      icon="favorite"
-      on-tap="{{favoriteTapped}}">
-    </core-icon-button>
- -->
+<!--
+CSS styling
+TODO: improve the width and height of the component depending on the parameter received by the component
+-->
 	<style>
 			:host {
 				display: block;
@@ -85,14 +99,80 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	<script>
 
 		Polymer({
-		// TODO: documentation like :https://github.com/GoogleWebComponents
+		/**
+		* Fired when the component is ready for showing the video.
+		*
+		* @event sevianno-video-canvas-domReady
+		*/
+	
+	
+		/**
+		* The width of the video to be played.
+		*
+		*@attribute widthvideo
+		*@type integer
+		*@default '320'
+		*/
 		widthvideo: '320',
+		
+		/**
+		* The height of the video to be played.
+		*
+		*@attribute heightvideo
+		*@type integer
+		*@default '240'
+		*/
 		heightvideo: '240',
+		
+		/**
+		* The source of the video to be played.
+		*
+		*@attribute sourcevidoe
+		*@type string
+		*@default 'http://golovin.de/ba/parking.mp4'
+		*/
 		sourcevideo:'http://golovin.de/ba/parking.mp4',
+		
+		/**
+		* This attribute shows the white margin on the video, where the user can draw.
+		*
+		*@attribute paddingcanvas
+		*@type integer
+		*@default '3'
+		*/
 		paddingcanvas:'3',
+		
+		/**
+		* This attribute in an FabricJS canvas object. This is used for the user to 
+		* enable free drawing also to take the JSON description of the canvas and store it.
+		*
+		*@attribute canvas
+		*@type object
+		*@default null
+		*/
 		canvas:null,
+		
+		/**
+		* This attribute is the time when the video should start playing. It is designed that when the user
+		* selects one annotation, the video start playing at the moment of the annotation.
+		*
+		*@attribute timevideo
+		*@type integer
+		*@default '3'
+		*/
 		timevideo:0,
+		
+		/**
+		* This attribute in an video object. This is used for the video object in the component,
+		* to enable play/pause/setTime.
+		*
+		*@attribute video
+		*@type object
+		*@default null
+		*/
 		video:null,
+		
+		
 		domReady: function() {
 		this.video = this.$.video,
 		this.canvas = this.__canvas = new fabric.Canvas(this.$.c, {
@@ -104,6 +184,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 			console.log(this.canvas)
 		},
 		
+		/**
+		* Computes parameters used for the template.
+		*/
 		computed: {
         canvasWidth: 'widthvideo/1 + paddingcanvas/1',
 		canvasHeight: 'heightvideo/1 + paddingcanvas/1',
@@ -111,6 +194,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		videoMargin: 'paddingcanvas/2'
 		
 		},
+		
+		/**
+		* When the time of the video is changed, this function catches this event.
+		* This can be used for all other attributes that the component has defined.
+		*/
 		timevideoChanged: function() {
         // when the time of the video changes
 		if(this.video){
@@ -118,6 +206,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		this.video.play();
 		}
       },
+	  /**
+	  * This function is used to play pause the video.
+	  */
 		playPause: function () {
 		if (this.video.paused == true) {
 		// Play the video
@@ -126,22 +217,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		
 		console.log(this.canvas);
 		console.log(JSON.stringify(this.canvas));
-		// Update the button text to 'Pause'
-		this.$.playpause.innerHTML = "Pause";
 		} else {
 		// Pause the video
 		this.video.pause();
-		// Update the button text to 'Play'
-		this.$.playpause.innerHTML = "Play";
-		}
-		},
-		fullscreen: function () {
-		if (this.video.requestFullscreen) {
-		this.video.requestFullscreen();
-		} else if (this.video.mozRequestFullScreen) {
-		this.video.mozRequestFullScreen(); // Firefox
-		} else if (video.webkitRequestFullscreen) {
-		this.video.webkitRequestFullscreen(); // Chrome and Safari
 		}
 		}
 		
