@@ -60,8 +60,10 @@ The set of parameters is subject of change since all the properties of this comp
 <polymer-element name="sevianno-video-canvas" attributes="paddingcanvas sourcevideo widthvideo heightvideo preloadvideo timevideo">
   <template>
 
-		<canvas id="c" height={{canvasHeight}} width={{canvasWidth}} style="border: 1px solid rgb(170, 170, 170);  left: 10px; top: 10px; -moz-user-select: none; cursor: crosshair;"></canvas>
-		<video id="video" width={{widthvideo}} height={{heightvideo}} preload={{preloadvideo}} src={{sourcevideo}} ></video> 	
+	<div id="content-container">
+		<video id="video" muted="" width={{widthvideo}} height={{heightvideo}} preload={{preloadvideo}} src={{sourcevideo}} ></video> 
+		<canvas id="c" height={{canvasHeight}} width={{canvasWidth}} style="border: 1px solid rgb(170, 170, 170);height: {{canvasHeight}}px; width: {{canvasWidth}}px; cursor: crosshair;"></canvas>
+	<div>
 
 <!--
 CSS styling
@@ -74,21 +76,21 @@ TODO: improve the width and height of the component depending on the parameter r
 				}
 			#content-container {
 				position: relative;
-				width: 500px;
+				height: {{canvasHeight}}px;
+				width: {{canvasWidth}}px;
 				clear: both;
 			}
 			canvas {
 				position: absolute;
-				height: 400px;
-				width: 500px;
 				top: 0px;
 				left: 0px;
 			}
 			video {
-				width: 500px;
+				width: {{widthvideo}}px;
+				height: {{heightvideo}}px;
 				position: absolute;
-				top: 20px;
-				left: 20px;
+				top: {{paddingcanvas}}px;
+				left: {{paddingcanvas}}px;
 			}
 			
 	</style>
@@ -113,7 +115,7 @@ TODO: improve the width and height of the component depending on the parameter r
 		*@type integer
 		*@default '320'
 		*/
-		widthvideo: '320',
+		widthvideo: 320,
 		
 		/**
 		* The height of the video to be played.
@@ -122,7 +124,7 @@ TODO: improve the width and height of the component depending on the parameter r
 		*@type integer
 		*@default '240'
 		*/
-		heightvideo: '240',
+		heightvideo: 240,
 		
 		/**
 		* The source of the video to be played.
@@ -140,7 +142,7 @@ TODO: improve the width and height of the component depending on the parameter r
 		*@type integer
 		*@default '3'
 		*/
-		paddingcanvas:'3',
+		paddingcanvas:3,
 		
 		/**
 		* This attribute in an FabricJS canvas object. This is used for the user to 
@@ -174,25 +176,22 @@ TODO: improve the width and height of the component depending on the parameter r
 		
 		
 		domReady: function() {
-		this.video = this.$.video,
+		this.video = this.$.video;
 		this.canvas = this.__canvas = new fabric.Canvas(this.$.c, {
 		
 			isDrawingMode: true
 		});
-			this.canvas.freeDrawingBrush.width = 10,
-			this.canvas.freeDrawingBrush.color = '#FF0000',
-			console.log(this.canvas)
+			this.canvas.freeDrawingBrush.width = 10;
+			this.canvas.freeDrawingBrush.color = '#FF0000';
+			console.log(this.canvas);
 		},
 		
 		/**
 		* Computes parameters used for the template.
 		*/
 		computed: {
-        canvasWidth: 'widthvideo/1 + paddingcanvas/1',
-		canvasHeight: 'heightvideo/1 + paddingcanvas/1',
-		canvasMarginTop: 'heightvideo/1 - paddingcanvas/1',
-		videoMargin: 'paddingcanvas/2'
-		
+        canvasWidth: 'widthvideo + 2*paddingcanvas',
+		canvasHeight: 'heightvideo + 2*paddingcanvas'		
 		},
 		
 		/**
@@ -203,9 +202,61 @@ TODO: improve the width and height of the component depending on the parameter r
         // when the time of the video changes
 		if(this.video){
 		this.video.currentTime = this.timevideo;
-		this.video.play();
+		//this.video.play();
 		}
-      },
+		},
+		widthvideoChanged: function() {
+        // when the time of the video changes
+		console.log(this.widthvideo);
+		this.reset();
+		},
+		heightvideoChanged: function() {
+        // when the time of the video changes
+		
+		console.log(this.heightvideo);
+		this.reset();
+		},
+		paddingcanvasChanged: function() {
+        // when the padding of the canvas changes
+		console.log(this.paddingcanvas);
+		this.reset();
+		},
+		sourcevideoChanged: function() {
+        // when the source of the video changes
+		console.log(this.sourcevideo);
+		//this.reset();
+		},
+		preloadvideoChanged: function() {
+        // when the preload of the video changes
+		console.log(this.preloadvideo);
+		//this.reset();
+		},
+		
+		getJSON: function() {
+		console.log("Get JSON on the component");
+		var canvasJSON = JSON.stringify(this.canvas);
+		this.fire('video-canvas-get-JSON', {canvas:canvasJSON});
+		//console.log(canvasJSON);
+		},
+		reset: function() {
+		console.log("reset called");
+		this.canvas.setHeight(this.canvasHeight);
+		this.canvas.setWidth(this.canvasWidth);
+		this.canvas.renderAll();
+		this.canvas.calcOffset();
+		console.log(this.canvas);
+		},
+		
+		setJSON: function(canvasJSON) {
+		if(canvasJSON)
+		{
+			this.canvas.loadFromJSON(canvasJSON, this.canvas.renderAll.bind(this.canvas), function(o, object) {
+			fabric.log(o, object);
+			console.log("setJSON called.");
+			});
+		}
+		
+		},
 	  /**
 	  * This function is used to play pause the video.
 	  */
