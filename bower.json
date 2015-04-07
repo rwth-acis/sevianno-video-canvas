@@ -1,15 +1,17 @@
 {
-  "name": "video-canvas-component",
+  "name": "sevianno-video-canvas",
   "version": "0.0.1",
   "homepage": "https://github.com/rwth-acis/sevianno-video-canvas",
   "authors": [
-    "Bujar Bakiu"
+    "Bujar Bakiu",
+    "István Koren"
   ],
-  "description": "This is the video canvas component for the annotation service",
+  "description": "This is the video canvas component for the video drawing service.",
   "keywords": [
-    "canvas"
+    "canvas",
+    "drawing"
   ],
-  "license": "MIT",
+  "license": "Apache 2.0",
   "ignore": [
     "**/.*",
     "node_modules",
@@ -18,6 +20,7 @@
     "tests"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#~0.5.5"
+    "polymer": "Polymer/polymer#^0.5",
+    "fabric": "~1.4.13"
   }
 }
