@@ -202,7 +202,7 @@ TODO: improve the width and height of the component depending on the parameter r
         // when the time of the video changes
 		if(this.video){
 		this.video.currentTime = this.timevideo;
-		//this.video.play();
+		this.video.play();
 		}
 		},
 		widthvideoChanged: function() {
@@ -240,11 +240,15 @@ TODO: improve the width and height of the component depending on the parameter r
 		},
 		reset: function() {
 		console.log("reset called");
+		
+		if (this.canvas) {
 		this.canvas.setHeight(this.canvasHeight);
 		this.canvas.setWidth(this.canvasWidth);
 		this.canvas.renderAll();
 		this.canvas.calcOffset();
 		console.log(this.canvas);
+		}
+		
 		},
 		
 		setJSON: function(canvasJSON) {
