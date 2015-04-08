@@ -30,10 +30,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
 
 <!--<link rel="import" href="sevianno-video-canvas/bower_components/core-icon-button/core-icon-button.html">-->
-<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="../polymer/polymer.html">
 
 
-<script type="text/javascript" src="bower_components/fabric/dist/fabric.js"></script>
+<script type="text/javascript" src="../fabric/dist/fabric.js"></script>
 <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
 <!--
 `sevianno-video-canvas` is a web component that play videos and shows drawing annotations.
@@ -202,7 +202,7 @@ TODO: improve the width and height of the component depending on the parameter r
         // when the time of the video changes
 		if(this.video){
 		this.video.currentTime = this.timevideo;
-		//this.video.play();
+		this.video.play();
 		}
 		},
 		widthvideoChanged: function() {
@@ -240,11 +240,15 @@ TODO: improve the width and height of the component depending on the parameter r
 		},
 		reset: function() {
 		console.log("reset called");
+		
+		if (this.canvas) {
 		this.canvas.setHeight(this.canvasHeight);
 		this.canvas.setWidth(this.canvasWidth);
 		this.canvas.renderAll();
 		this.canvas.calcOffset();
 		console.log(this.canvas);
+		}
+		
 		},
 		
 		setJSON: function(canvasJSON) {
