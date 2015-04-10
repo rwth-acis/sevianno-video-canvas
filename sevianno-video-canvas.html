@@ -221,7 +221,7 @@ TODO: improve the width and height of the component depending on the parameter r
 		this.video.pause();
 		//this.hiddenPlayButton = false;
 	  },
-	  //ended: function() { this.hiddenPlayButton = false; },
+	  ended: function() {  },
 	  timeupdate: function() {
 		if(this.video.duration <= 0) return;
 		var value = (100 / this.video.duration) * this.video.currentTime;
