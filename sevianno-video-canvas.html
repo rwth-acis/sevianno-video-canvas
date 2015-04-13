@@ -58,7 +58,7 @@ The set of parameters is subject of change since all the properties of this comp
 
 -->
 
-<polymer-element name="sevianno-video-canvas" attributes="paddingcanvas sourcevideo widthvideo heightvideo preloadvideo timevideo">
+<polymer-element name="sevianno-video-canvas" attributes="paddingcanvas sourcevideo widthvideo heightvideo preloadvideo timevideo jsonvideo">
   <template>
 
 	<div id="content-container">
@@ -191,6 +191,7 @@ TODO: improve the width and height of the component depending on the parameter r
 		<!--this.video.addEventListener("volumechange", this.volumechange.bind(this), true);-->
 		<!--this.video.addEventListener("waiting", this.waiting.bind(this), true);-->
 		this.video.addEventListener("playing", this.playing.bind(this), true);
+		
 		this.canvas = this.__canvas = new fabric.Canvas(this.$.c, {
 		
 			isDrawingMode: true
@@ -198,6 +199,19 @@ TODO: improve the width and height of the component depending on the parameter r
 			this.canvas.freeDrawingBrush.width = 10;
 			this.canvas.freeDrawingBrush.color = '#FF0000';
 			console.log(this.canvas);
+			
+			this.canvas.on('mouse:down', function(){
+											console.log(document);
+											var c = document.getElementById('seviannoVideoCanvas'); 
+											c.pauseClick();
+											});
+			this.canvas.on('mouse:up', function(){
+											
+											var c = document.getElementById('seviannoVideoCanvas'); 
+											c.sendAnnotation();
+											});
+			
+			 
 		},
 		
 		/**
@@ -210,14 +224,19 @@ TODO: improve the width and height of the component depending on the parameter r
 	  playClick: function () {
 		this.fire('core-signal', { name: "play" });
 	  },
+	  logging: function () {
+		console.log("dicka ndodhi");
+	  },
 	  pauseClick: function() {
 		this.fire('core-signal', { name: "pause" });
 	  },
 	  play: function() {
+	  	console.log("playing");
 		this.video.play();
 		//this.hiddenPlayButton = true;
 	  },
 	  pause: function() {
+	  console.log("pausing");
 		this.video.pause();
 		//this.hiddenPlayButton = false;
 	  },
@@ -314,15 +333,11 @@ TODO: improve the width and height of the component depending on the parameter r
 		
 		},
 		
-		setJSON: function(canvasJSON) {
-		if(canvasJSON)
-		{
-			this.canvas.loadFromJSON(canvasJSON, this.canvas.renderAll.bind(this.canvas), function(o, object) {
+		jsonvideoChanged: function() {
+			this.canvas.loadFromJSON(this.jsonvideo[0], this.canvas.renderAll.bind(this.canvas), function(o, object) {
 			fabric.log(o, object);
 			console.log("setJSON called.");
-			});
-		}
-		
+			});		
 		},
 	  /**
 	  * This function is used to play pause the video.
@@ -339,8 +354,24 @@ TODO: improve the width and height of the component depending on the parameter r
 		// Pause the video
 		this.video.pause();
 		}
+		},
+		
+		sendAnnotation: function() {
+		var time = this.video.currentTime;
+		var annotation = JSON.stringify(this.canvas);
+		var dataJson = '{"title":"New title","time":"'+time+'","annotation":"'+annotation+'"}';
+		this.fire('core-signal', { name: 'add-annotation', data: dataJson });
+		console.log(dataJson);
 		}
 		
 		});
+	//function pauseAVideo()
+	//{
+	//var v = document.querySelector("#video");
+	//v.pause();
+	//this.fire('core-signal', { name: "pause" });
+	//this.$.video.pause();
+	//}
 	</script>
+	
 </polymer-element>
