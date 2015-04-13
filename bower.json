@@ -11,6 +11,7 @@
     "canvas",
     "drawing"
   ],
+  "main": "sevianno-video-canvas.html",
   "license": "Apache 2.0",
   "ignore": [
     "**/.*",
