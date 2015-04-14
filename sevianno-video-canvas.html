@@ -66,6 +66,7 @@ The set of parameters is subject of change since all the properties of this comp
 		<core-signals on-core-signal-play="{{play}}"></core-signals>
 		<core-signals on-core-signal-pause="{{pause}}"></core-signals>
 		<core-signals on-core-signal-change="{{change}}"></core-signals>
+		<core-signals on-core-signal-show-annotation="{{showAnnotation}}"></core-signals>
 		<!--<core-signals on-core-signal-volume="{{volume}}"></core-signals>-->
 		<canvas id="c" height={{canvasHeight}} width={{canvasWidth}} style="border: 1px solid rgb(170, 170, 170);height: {{canvasHeight}}px; width: {{canvasWidth}}px; cursor: crosshair;"></canvas>
 	<div>
@@ -183,8 +184,8 @@ TODO: improve the width and height of the component depending on the parameter r
 		domReady: function() {
 		this.video = this.$.video;
 		this.video.onended = this.ended.bind(this);
-		this.video.addEventListener('play', this.playClick.bind(this), true);
-		this.video.addEventListener('pause', this.pauseClick.bind(this), true);
+		<!-- this.video.addEventListener('play', this.play.bind(this), true); -->
+		<!--this.video.addEventListener('pause', this.pause.bind(this), true); -->
 		this.video.addEventListener("timeupdate", this.timeupdate.bind(this), true);
 		this.video.addEventListener("progress", this.progress.bind(this), true);
 		this.video.addEventListener("canplay", this.canplay.bind(this), true);
@@ -198,17 +199,15 @@ TODO: improve the width and height of the component depending on the parameter r
 		});
 			this.canvas.freeDrawingBrush.width = 10;
 			this.canvas.freeDrawingBrush.color = '#FF0000';
-			console.log(this.canvas);
-			
+			var video = this.$.video;
+			var pauseSignal = this.pauseClick.bind(this);
+			var sendAnnotationFunction = this.sendAnnotation.bind(this);
+					
 			this.canvas.on('mouse:down', function(){
-											console.log(document);
-											var c = document.getElementById('seviannoVideoCanvas'); 
-											c.pauseClick();
+											pauseSignal();
 											});
 			this.canvas.on('mouse:up', function(){
-											
-											var c = document.getElementById('seviannoVideoCanvas'); 
-											c.sendAnnotation();
+											 sendAnnotationFunction();
 											});
 			
 			 
@@ -224,20 +223,19 @@ TODO: improve the width and height of the component depending on the parameter r
 	  playClick: function () {
 		this.fire('core-signal', { name: "play" });
 	  },
-	  logging: function () {
-		console.log("dicka ndodhi");
-	  },
 	  pauseClick: function() {
 		this.fire('core-signal', { name: "pause" });
 	  },
 	  play: function() {
 	  	console.log("playing");
 		this.video.play();
+		this.canvas.clear();
 		//this.hiddenPlayButton = true;
 	  },
 	  pause: function() {
 	  console.log("pausing");
 		this.video.pause();
+		
 		//this.hiddenPlayButton = false;
 	  },
 	  ended: function() {  },
@@ -314,29 +312,27 @@ TODO: improve the width and height of the component depending on the parameter r
 		//this.reset();
 		},
 		
-		getJSON: function() {
-		console.log("Get JSON on the component");
-		var canvasJSON = JSON.stringify(this.canvas);
-		this.fire('video-canvas-get-JSON', {canvas:canvasJSON});
-		//console.log(canvasJSON);
+		showAnnotation: function(e, detail, sender) {
+			console.log(detail);
+			this.canvas.clear();
+			this.time = detail.time;
+			this.jsonvideo = detail.jsonvideo;
+			//console.log(canvasJSON);
 		},
 		reset: function() {
-		console.log("reset called");
-		
 		if (this.canvas) {
-		this.canvas.setHeight(this.canvasHeight);
-		this.canvas.setWidth(this.canvasWidth);
-		this.canvas.renderAll();
-		this.canvas.calcOffset();
-		console.log(this.canvas);
+			this.canvas.setHeight(this.canvasHeight);
+			this.canvas.setWidth(this.canvasWidth);
+			this.canvas.renderAll();
+			this.canvas.calcOffset();
+			//console.log(this.canvas);
 		}
 		
 		},
 		
 		jsonvideoChanged: function() {
-			this.canvas.loadFromJSON(this.jsonvideo[0], this.canvas.renderAll.bind(this.canvas), function(o, object) {
+			this.canvas.loadFromJSON(this.jsonvideo, this.canvas.renderAll.bind(this.canvas), function(o, object) {
 			fabric.log(o, object);
-			console.log("setJSON called.");
 			});		
 		},
 	  /**
@@ -348,8 +344,8 @@ TODO: improve the width and height of the component depending on the parameter r
 		this.video.currentTime = this.timevideo;
 		this.video.play();
 		
-		console.log(this.canvas);
-		console.log(JSON.stringify(this.canvas));
+		//console.log(this.canvas);
+		//console.log(JSON.stringify(this.canvas));
 		} else {
 		// Pause the video
 		this.video.pause();
@@ -357,11 +353,14 @@ TODO: improve the width and height of the component depending on the parameter r
 		},
 		
 		sendAnnotation: function() {
-		var time = this.video.currentTime;
-		var annotation = JSON.stringify(this.canvas);
-		var dataJson = '{"title":"New title","time":"'+time+'","annotation":"'+annotation+'"}';
-		this.fire('core-signal', { name: 'add-annotation', data: dataJson });
-		console.log(dataJson);
+			var annotation;
+			annotation = {
+			title : "New title",
+			time : this.video.currentTime,
+			annotationJson : JSON.stringify(this.canvas)
+			};
+			this.fire('core-signal', { name: 'add-annotation', data: annotation });
+		//console.log(dataJson);
 		}
 		
 		});
