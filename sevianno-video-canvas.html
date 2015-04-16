@@ -315,7 +315,7 @@ TODO: improve the width and height of the component depending on the parameter r
 		showAnnotation: function(e, detail, sender) {
 			console.log(detail);
 			this.canvas.clear();
-			this.time = detail.time;
+			this.timevideo = detail.time;
 			this.jsonvideo = detail.jsonvideo;
 			//console.log(canvasJSON);
 		},
@@ -353,10 +353,13 @@ TODO: improve the width and height of the component depending on the parameter r
 		},
 		
 		sendAnnotation: function() {
+			var valuePixel = (167 / this.video.duration) * this.video.currentTime + 16;
+			console.log(valuePixel);
 			var annotation;
 			annotation = {
 			title : "New title",
 			time : this.video.currentTime,
+			value: valuePixel,
 			annotationJson : JSON.stringify(this.canvas)
 			};
 			this.fire('core-signal', { name: 'add-annotation', data: annotation });
