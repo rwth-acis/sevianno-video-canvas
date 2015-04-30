@@ -241,8 +241,11 @@ TODO: improve the width and height of the component depending on the parameter r
 	  ended: function() {  },
 	  timeupdate: function() {
 		if(this.video.duration <= 0) return;
+		var time = this.video.currentTime;
 		var value = (100 / this.video.duration) * this.video.currentTime;
-		this.fire('core-signal', { name: 'timeupdate', data: value });
+		var timeValue = {time:this.video.currentTime,
+						 sliderValue:value };
+		this.fire('core-signal', { name: 'timeupdate', data: timeValue });
 	  },
 	  progress: function() {  
 		if(this.video.duration <= 0 || this.video.buffered.length === 0) return;
