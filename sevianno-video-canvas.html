@@ -58,18 +58,19 @@ The set of parameters is subject of change since all the properties of this comp
 
 -->
 
-<polymer-element name="sevianno-video-canvas" attributes="paddingcanvas sourcevideo widthvideo heightvideo preloadvideo timevideo jsonvideo">
+<polymer-element name="sevianno-video-canvas" attributes="padding source width height time jsonAnnotation">
   <template>
 
-	<div id="content-container">
-		<video id="video" muted="" width={{widthvideo}} height={{heightvideo}} preload={{preloadvideo}} src={{sourcevideo}} ></video> 
-		<core-signals on-core-signal-play="{{play}}"></core-signals>
-		<core-signals on-core-signal-pause="{{pause}}"></core-signals>
-		<core-signals on-core-signal-change="{{change}}"></core-signals>
-		<core-signals on-core-signal-show-annotation="{{showAnnotation}}"></core-signals>
-		<!--<core-signals on-core-signal-volume="{{volume}}"></core-signals>-->
-		<canvas id="c" height={{canvasHeight}} width={{canvasWidth}} style="border: 1px solid rgb(170, 170, 170);height: {{canvasHeight}}px; width: {{canvasWidth}}px; cursor: crosshair;"></canvas>
+	<div id="content-container" horizontal layout center flex>
+		<video id="video" muted="" preload="auto" src={{source}}></video> 
+		
+		<canvas id="c" width={{width}} height={{height}} style="cursor: crosshair;"></canvas>
+		
 	<div>
+	<core-signals on-core-signal-play="{{play}}"></core-signals>
+	<core-signals on-core-signal-pause="{{pause}}"></core-signals>
+	<core-signals on-core-signal-change="{{change}}"></core-signals>
+	<core-signals on-core-signal-show-annotation="{{showAnnotation}}"></core-signals>
 
 <!--
 CSS styling
@@ -77,27 +78,32 @@ TODO: improve the width and height of the component depending on the parameter r
 -->
 	<style>
 			:host {
-				display: block;
-				float:right;
-				}
+				display: inline-block;
+				width:{{width}};
+								}
 			#content-container {
 				position: relative;
-				height: {{canvasHeight}}px;
-				width: {{canvasWidth}}px;
-				clear: both;
+				/*height: {{canvasHeight}}px;
+				width: {{canvasWidth}}px;*/
+				overflow: hidden;
 			}
-			canvas {
+			
+			video {
 				position: absolute;
 				top: 0px;
 				left: 0px;
+				width: 100%;
+				height:100%;
 			}
-			video {
-				width: {{widthvideo}}px;
-				height: {{heightvideo}}px;
-				position: absolute;
-				top: {{paddingcanvas}}px;
-				left: {{paddingcanvas}}px;
-			}
+			canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+                    }
 			
 	</style>
 
@@ -121,7 +127,7 @@ TODO: improve the width and height of the component depending on the parameter r
 		*@type integer
 		*@default '320'
 		*/
-		widthvideo: 320,
+		width: 320,
 		
 		/**
 		* The height of the video to be played.
@@ -130,7 +136,7 @@ TODO: improve the width and height of the component depending on the parameter r
 		*@type integer
 		*@default '240'
 		*/
-		heightvideo: 240,
+		height: 500,
 		
 		/**
 		* The source of the video to be played.
@@ -139,7 +145,7 @@ TODO: improve the width and height of the component depending on the parameter r
 		*@type string
 		*@default 'http://golovin.de/ba/parking.mp4'
 		*/
-		sourcevideo:'http://golovin.de/ba/parking.mp4',
+		source:'http://golovin.de/ba/parking.mp4',
 		
 		/**
 		* This attribute shows the white margin on the video, where the user can draw.
@@ -148,7 +154,7 @@ TODO: improve the width and height of the component depending on the parameter r
 		*@type integer
 		*@default '3'
 		*/
-		paddingcanvas:3,
+		padding:3,
 		
 		/**
 		* This attribute in an FabricJS canvas object. This is used for the user to 
@@ -168,7 +174,7 @@ TODO: improve the width and height of the component depending on the parameter r
 		*@type integer
 		*@default '3'
 		*/
-		timevideo:0,
+		time:0,
 		
 		/**
 		* This attribute in an video object. This is used for the video object in the component,
@@ -192,6 +198,11 @@ TODO: improve the width and height of the component depending on the parameter r
 		<!--this.video.addEventListener("volumechange", this.volumechange.bind(this), true);-->
 		<!--this.video.addEventListener("waiting", this.waiting.bind(this), true);-->
 		this.video.addEventListener("playing", this.playing.bind(this), true);
+		//this.width = this.video.videoWidth;
+		console.log(this.video.offsetHeight);
+		//this.height = this.video.videoHeight;
+		console.log(this.video.offsetWidth);
+		
 		
 		this.canvas = this.__canvas = new fabric.Canvas(this.$.c, {
 		
@@ -210,15 +221,15 @@ TODO: improve the width and height of the component depending on the parameter r
 											 sendAnnotationFunction();
 											});
 			
-			 
+		this.play();	 
 		},
 		
 		/**
 		* Computes parameters used for the template.
 		*/
 		computed: {
-        canvasWidth: 'widthvideo + 2*paddingcanvas',
-		canvasHeight: 'heightvideo + 2*paddingcanvas'		
+        canvasWidth: 'width + 2*padding',
+		canvasHeight: 'height + 2*padding'		
 		},
 	  playClick: function () {
 		this.fire('core-signal', { name: "play" });
@@ -229,12 +240,14 @@ TODO: improve the width and height of the component depending on the parameter r
 	  play: function() {
 	  	console.log("playing");
 		this.video.play();
-		this.canvas.clear();
+		//this.canvas.clear();
+		this.resizeCanvas();
 		//this.hiddenPlayButton = true;
 	  },
 	  pause: function() {
 	  console.log("pausing");
 		this.video.pause();
+		this.resizeCanvas();
 		
 		//this.hiddenPlayButton = false;
 	  },
@@ -245,6 +258,8 @@ TODO: improve the width and height of the component depending on the parameter r
 		var value = (100 / this.video.duration) * this.video.currentTime;
 		var timeValue = {time:this.video.currentTime,
 						 sliderValue:value };
+		this.resizeCanvas();
+		
 		this.fire('core-signal', { name: 'timeupdate', data: timeValue });
 	  },
 	  progress: function() {  
@@ -281,60 +296,54 @@ TODO: improve the width and height of the component depending on the parameter r
 		* When the time of the video is changed, this function catches this event.
 		* This can be used for all other attributes that the component has defined.
 		*/
-		timevideoChanged: function() {
+		timeChanged: function() {
         // when the time of the video changes
 		if(this.video){
-		this.video.currentTime = this.timevideo;
+		this.video.currentTime = this.time;
 		this.video.play();
 		}
 		},
-		widthvideoChanged: function() {
+		widthChanged: function() {
         // when the time of the video changes
-		console.log(this.widthvideo);
+		//console.log(this.width);
 		this.reset();
 		},
-		heightvideoChanged: function() {
+		heightChanged: function() {
         // when the time of the video changes
 		
-		console.log(this.heightvideo);
+		//console.log(this.height);
 		this.reset();
 		},
-		paddingcanvasChanged: function() {
+		paddingChanged: function() {
         // when the padding of the canvas changes
-		console.log(this.paddingcanvas);
+		//console.log(this.padding);
 		this.reset();
 		},
-		sourcevideoChanged: function() {
+		sourceChanged: function() {
         // when the source of the video changes
-		console.log(this.sourcevideo);
-		//this.reset();
+		//console.log(this.sourcevideo);
+		this.reset();
 		},
-		preloadvideoChanged: function() {
-        // when the preload of the video changes
-		console.log(this.preloadvideo);
-		//this.reset();
-		},
-		
+			
 		showAnnotation: function(e, detail, sender) {
 			console.log(detail);
 			this.canvas.clear();
-			this.timevideo = detail.time;
-			this.jsonvideo = detail.jsonvideo;
+			this.time = detail.time;
+			this.jsonAnnotation = detail.jsonvideo;
 			//console.log(canvasJSON);
 		},
 		reset: function() {
-		if (this.canvas) {
-			this.canvas.setHeight(this.canvasHeight);
-			this.canvas.setWidth(this.canvasWidth);
-			this.canvas.renderAll();
-			this.canvas.calcOffset();
-			//console.log(this.canvas);
+		console.log("reset called");
+		this.resizeCanvas();
+		if(this.video){
+		console.log(this.video.offsetHeight);
+		//this.height = this.video.videoHeight;
+		console.log(this.video.offsetWidth);
 		}
-		
 		},
 		
-		jsonvideoChanged: function() {
-			this.canvas.loadFromJSON(this.jsonvideo, this.canvas.renderAll.bind(this.canvas), function(o, object) {
+		jsonAnnotationChanged: function() {
+			this.canvas.loadFromJSON(this.jsonAnnotation, this.canvas.renderAll.bind(this.canvas), function(o, object) {
 			fabric.log(o, object);
 			});		
 		},
@@ -344,7 +353,7 @@ TODO: improve the width and height of the component depending on the parameter r
 		playPause: function () {
 		if (this.video.paused == true) {
 		// Play the video
-		this.video.currentTime = this.timevideo;
+		this.video.currentTime = this.time;
 		this.video.play();
 		
 		//console.log(this.canvas);
@@ -367,16 +376,43 @@ TODO: improve the width and height of the component depending on the parameter r
 			};
 			this.fire('core-signal', { name: 'add-annotation', data: annotation });
 		//console.log(dataJson);
+		},
+		resizeCanvas: function(){
+		
+		if (this.canvas) {
+		var factor = this.video.offsetWidth/(this.canvas.getWidth());
+		console.log(factor);
+		if(factor!=1){
+		var objects = this.canvas.getObjects();
+			for (var i in objects) {
+				var scaleX = objects[i].scaleX;
+				var scaleY = objects[i].scaleY;
+				var left = objects[i].left;
+				var top = objects[i].top;
+
+				var tempScaleX = scaleX * factor;
+				var tempScaleY = scaleY * factor;
+				var tempLeft = left * factor;
+				//var tempTop = top * factor;
+
+				objects[i].scaleX = tempScaleX;
+				objects[i].scaleY = tempScaleY;
+				objects[i].left = tempLeft;
+				//objects[i].top = tempTop;
+
+				objects[i].setCoords();
+			}
+		}
+			this.canvas.setHeight(this.video.offsetHeight);
+			this.canvas.setWidth(this.video.offsetWidth);
+			this.canvas.renderAll();
+			this.canvas.calcOffset();
+			//console.log(this.canvas);
+		}
+		
 		}
 		
 		});
-	//function pauseAVideo()
-	//{
-	//var v = document.querySelector("#video");
-	//v.pause();
-	//this.fire('core-signal', { name: "pause" });
-	//this.$.video.pause();
-	//}
 	</script>
 	
 </polymer-element>
