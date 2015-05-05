@@ -58,11 +58,11 @@ The set of parameters is subject of change since all the properties of this comp
 
 -->
 
-<polymer-element name="sevianno-video-canvas" attributes="padding source width height time jsonAnnotation">
+<polymer-element name="sevianno-video-canvas" attributes="padding src width height time jsonAnnotation">
   <template>
 
 	<div id="content-container" horizontal layout center flex>
-		<video id="video" muted="" preload="auto" src={{source}}></video> 
+		<video id="video" muted="" preload="auto" src={{src}}></video> 
 		
 		<canvas id="c" width={{width}} height={{height}} style="cursor: crosshair;"></canvas>
 		
@@ -93,7 +93,6 @@ TODO: improve the width and height of the component depending on the parameter r
 				top: 0px;
 				left: 0px;
 				width: 100%;
-				height:100%;
 			}
 			canvas {
             display: block;
@@ -141,11 +140,11 @@ TODO: improve the width and height of the component depending on the parameter r
 		/**
 		* The source of the video to be played.
 		*
-		*@attribute sourcevidoe
+		*@attribute src
 		*@type string
 		*@default 'http://golovin.de/ba/parking.mp4'
 		*/
-		source:'http://golovin.de/ba/parking.mp4',
+		src:'http://golovin.de/ba/parking.mp4',
 		
 		/**
 		* This attribute shows the white margin on the video, where the user can draw.
@@ -204,24 +203,19 @@ TODO: improve the width and height of the component depending on the parameter r
 		console.log(this.video.offsetWidth);
 		
 		
-		this.canvas = this.__canvas = new fabric.Canvas(this.$.c, {
-		
-			isDrawingMode: true
-		});
-			this.canvas.freeDrawingBrush.width = 10;
-			this.canvas.freeDrawingBrush.color = '#FF0000';
-			var video = this.$.video;
-			var pauseSignal = this.pauseClick.bind(this);
-			var sendAnnotationFunction = this.sendAnnotation.bind(this);
-					
-			this.canvas.on('mouse:down', function(){
-											pauseSignal();
+		this.canvas = this.__canvas = new fabric.Canvas(this.$.c);
+		this.canvas.isDrawingMode = true;
+		this.canvas.freeDrawingBrush.width = 15;
+		this.canvas.freeDrawingBrush.color = '#FFF000';
+		var video = this.$.video;
+		var pauseSignal = this.pauseClick.bind(this);
+		var sendAnnotationFunction = this.sendAnnotation.bind(this);
+		this.canvas.on('mouse:down', function(){
+										pauseSignal();
+										});
+		this.canvas.on('mouse:up', function(){
+										 sendAnnotationFunction();
 											});
-			this.canvas.on('mouse:up', function(){
-											 sendAnnotationFunction();
-											});
-			
-		this.play();	 
 		},
 		
 		/**
@@ -231,139 +225,122 @@ TODO: improve the width and height of the component depending on the parameter r
         canvasWidth: 'width + 2*padding',
 		canvasHeight: 'height + 2*padding'		
 		},
-	  playClick: function () {
-		this.fire('core-signal', { name: "play" });
-	  },
-	  pauseClick: function() {
-		this.fire('core-signal', { name: "pause" });
-	  },
-	  play: function() {
-	  	console.log("playing");
-		this.video.play();
-		//this.canvas.clear();
-		this.resizeCanvas();
-		//this.hiddenPlayButton = true;
-	  },
-	  pause: function() {
-	  console.log("pausing");
-		this.video.pause();
-		this.resizeCanvas();
-		
-		//this.hiddenPlayButton = false;
-	  },
-	  ended: function() {  },
-	  timeupdate: function() {
-		if(this.video.duration <= 0) return;
-		var time = this.video.currentTime;
-		var value = (100 / this.video.duration) * this.video.currentTime;
-		var timeValue = {time:this.video.currentTime,
-						 sliderValue:value };
-		this.resizeCanvas();
-		
-		this.fire('core-signal', { name: 'timeupdate', data: timeValue });
-	  },
-	  progress: function() {  
-		if(this.video.duration <= 0 || this.video.buffered.length === 0) return;
-		var buffered_end = this.video.buffered.end(this.video.buffered.length - 1);
-		var progress_amount = (buffered_end / this.video.duration) * 100;
-		this.fire('core-signal', { name: 'progress-amount', data: progress_amount });
-	  },
-	  canplay: function() {
-		this.fire('core-signal', { name: 'canplay' });
-	  },
-	  waiting: function() {
-		this.hiddenWaitingScreen = false;
-	  },
-	  playing: function() {
-		this.hiddenWaitingScreen = true;
-	  },
-	  volumechange: function() {
-		if(this.video.muted) {
-		  this.fire('core-signal', { name: 'volumechange', data: 0 });
-		  this.video.muted = false;
-		}
-		else this.fire('core-signal', { name: 'volumechange', data: this.video.volume*100 });
-	  },
-	  change: function(e, detail, sender) {
-		if(isNaN(this.video.duration)) return;
-		this.video.currentTime= this.video.duration * (detail / 100);
-	  },
-	  volume: function(e, detail, sender) {
-		this.video.volume = detail;
-	  },
-		
+		playClick: function () {
+			this.fire('core-signal', { name: "play" });
+		},
+		pauseClick: function() {
+			this.fire('core-signal', { name: "pause" });
+		},
+		play: function() {
+			this.video.play();
+			this.resizeCanvas();
+		},
+		pause: function() {
+			this.video.pause();
+			this.resizeCanvas();
+		},
+		ended: function() {  },
+		timeupdate: function() {
+			if(this.video.duration <= 0) return;
+			var time = this.video.currentTime;
+			var value = (100 / this.video.duration) * this.video.currentTime;
+			var timeValue = {time:this.video.currentTime,
+							 sliderValue:value };
+			this.resizeCanvas();
+			this.fire('core-signal', { name: 'timeupdate', data: timeValue });
+		},
+		progress: function() {  
+			if(this.video.duration <= 0 || this.video.buffered.length === 0) return;
+			var buffered_end = this.video.buffered.end(this.video.buffered.length - 1);
+			var progress_amount = (buffered_end / this.video.duration) * 100;
+			this.fire('core-signal', { name: 'progress-amount', data: progress_amount });
+		},
+		canplay: function() {
+			this.fire('core-signal', { name: 'canplay' });
+		},
+		waiting: function() {
+			this.hiddenWaitingScreen = false;
+		},
+		playing: function() {
+			this.hiddenWaitingScreen = true;
+		},
+		volumechange: function() {
+			if(this.video.muted) {
+			  this.fire('core-signal', { name: 'volumechange', data: 0 });
+			  this.video.muted = false;
+			}
+			else this.fire('core-signal', { name: 'volumechange', data: this.video.volume*100 });
+		},
+		change: function(e, detail, sender) {
+			if(isNaN(this.video.duration)) return;
+			this.video.currentTime= this.video.duration * (detail / 100);
+			},
+			volume: function(e, detail, sender) {
+			this.video.volume = detail;
+		},
+
 		/**
 		* When the time of the video is changed, this function catches this event.
 		* This can be used for all other attributes that the component has defined.
 		*/
 		timeChanged: function() {
-        // when the time of the video changes
-		if(this.video){
-		this.video.currentTime = this.time;
-		this.video.play();
-		}
+		// when the time of the video changes
+			if(this.video){
+				this.video.currentTime = this.time;
+				this.video.play();
+			}
 		},
 		widthChanged: function() {
-        // when the time of the video changes
-		//console.log(this.width);
-		this.reset();
+		// when the time of the video changes
+			this.reset();
 		},
 		heightChanged: function() {
-        // when the time of the video changes
-		
-		//console.log(this.height);
-		this.reset();
+		// when the time of the video changes
+			this.reset();
 		},
 		paddingChanged: function() {
-        // when the padding of the canvas changes
-		//console.log(this.padding);
-		this.reset();
+		// when the padding of the canvas changes
+			this.reset();
 		},
-		sourceChanged: function() {
-        // when the source of the video changes
-		//console.log(this.sourcevideo);
-		this.reset();
+		srcChanged: function() {
+		// when the source of the video changes
+			this.reset();
 		},
 			
-		showAnnotation: function(e, detail, sender) {
-			console.log(detail);
-			this.canvas.clear();
+		showAnnotation: function(e, Sdetail, sender) {
 			this.time = detail.time;
 			this.jsonAnnotation = detail.jsonvideo;
-			//console.log(canvasJSON);
+			var pauseSignal = this.pauseClick.bind(this);
+			var playSignal = this.playClick.bind(this);
+			pauseSignal();
+			// Now create a timer so in 10 second (1s = 1000 so 10s = 10000 ms) it will pause the video.
+			setTimeout(function(){
+				playSignal(); 
+			},5000);
 		},
 		reset: function() {
-		console.log("reset called");
-		this.resizeCanvas();
-		if(this.video){
-		console.log(this.video.offsetHeight);
-		//this.height = this.video.videoHeight;
-		console.log(this.video.offsetWidth);
-		}
+				this.resizeCanvas();
 		},
-		
 		jsonAnnotationChanged: function() {
 			this.canvas.loadFromJSON(this.jsonAnnotation, this.canvas.renderAll.bind(this.canvas), function(o, object) {
 			fabric.log(o, object);
-			});		
+			});	
+			this.pauseVideo();
+			
 		},
-	  /**
-	  * This function is used to play pause the video.
-	  */
+		/**
+		* This function is used to play pause the video.
+		*/
 		playPause: function () {
 		if (this.video.paused == true) {
 		// Play the video
 		this.video.currentTime = this.time;
 		this.video.play();
-		
-		//console.log(this.canvas);
-		//console.log(JSON.stringify(this.canvas));
 		} else {
 		// Pause the video
 		this.video.pause();
 		}
 		},
-		
 		sendAnnotation: function() {
 			var valuePixel = (167 / this.video.duration) * this.video.currentTime + 16;
 			console.log(valuePixel);
@@ -377,41 +354,55 @@ TODO: improve the width and height of the component depending on the parameter r
 			this.fire('core-signal', { name: 'add-annotation', data: annotation });
 		//console.log(dataJson);
 		},
-		resizeCanvas: function(){
-		
-		if (this.canvas) {
-		var factor = this.video.offsetWidth/(this.canvas.getWidth());
-		console.log(factor);
-		if(factor!=1){
-		var objects = this.canvas.getObjects();
-			for (var i in objects) {
-				var scaleX = objects[i].scaleX;
-				var scaleY = objects[i].scaleY;
-				var left = objects[i].left;
-				var top = objects[i].top;
+		resizeCanvas: function(){		
+			if (this.canvas) {
+				var factor = this.video.offsetWidth/(this.canvas.getWidth());
+				if(factor!=1){
+				var objects = this.canvas.getObjects();
+					for (var i in objects) {
+						var scaleX = objects[i].scaleX;
+						var scaleY = objects[i].scaleY;
+						var left = objects[i].left;
+						var top = objects[i].top;
 
-				var tempScaleX = scaleX * factor;
-				var tempScaleY = scaleY * factor;
-				var tempLeft = left * factor;
-				//var tempTop = top * factor;
+						var tempScaleX = scaleX * factor;
+						var tempScaleY = scaleY * factor;
+						var tempLeft = left * factor;
+						//var tempTop = top * factor;
 
-				objects[i].scaleX = tempScaleX;
-				objects[i].scaleY = tempScaleY;
-				objects[i].left = tempLeft;
-				//objects[i].top = tempTop;
+						objects[i].scaleX = tempScaleX;
+						objects[i].scaleY = tempScaleY;
+						objects[i].left = tempLeft;
+						//objects[i].top = tempTop;
 
-				objects[i].setCoords();
-			}
+						objects[i].setCoords();
+					}
+				}
+				this.canvas.setHeight(this.video.offsetHeight);
+				this.canvas.setWidth(this.video.offsetWidth);
+				this.canvas.renderAll();
+				this.canvas.calcOffset();
+			}		
+		},
+		clearCanvas: function(){
+			this.canvas.clear();
+		},
+		setCanvasProperties: function(){
+			this.canvas.freeDrawingBrush = new fabric['PencilBrush'](this.canvas);
+			this.canvas.freeDrawingBrush.width = 10;
+			this.canvas.freeDrawingBrush.color = '#FF0000';
+		},
+		pauseVideo: function(){
+			var pauseSignal = this.pauseClick.bind(this);
+			var playSignal = this.playClick.bind(this);
+			var clearCanvas = this.clearCanvas.bind(this);
+			pauseSignal();
+			// Now create a timer so in 10 second (1s = 1000 so 10s = 10000 ms) it will pause the video.
+			setTimeout(function(){
+				playSignal();
+				clearCanvas();
+			},5000);
 		}
-			this.canvas.setHeight(this.video.offsetHeight);
-			this.canvas.setWidth(this.video.offsetWidth);
-			this.canvas.renderAll();
-			this.canvas.calcOffset();
-			//console.log(this.canvas);
-		}
-		
-		}
-		
 		});
 	</script>
 	
