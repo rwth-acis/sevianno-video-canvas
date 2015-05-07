@@ -342,13 +342,13 @@ TODO: improve the width and height of the component depending on the parameter r
 		}
 		},
 		sendAnnotation: function() {
-			var valuePixel = (167 / this.video.duration) * this.video.currentTime + 16;
-			console.log(valuePixel);
+			var valuePercentage = (this.video.currentTime / this.video.duration) ;
+			console.log(valuePercentage);
 			var annotation;
 			annotation = {
 			title : "New title",
 			time : this.video.currentTime,
-			value: valuePixel,
+			value: valuePercentage,
 			annotationJson : JSON.stringify(this.canvas)
 			};
 			this.fire('core-signal', { name: 'add-annotation', data: annotation });
@@ -367,13 +367,13 @@ TODO: improve the width and height of the component depending on the parameter r
 
 						var tempScaleX = scaleX * factor;
 						var tempScaleY = scaleY * factor;
-						var tempLeft = left * factor;
-						//var tempTop = top * factor;
+						var tempLeft = left * (factor);
+						var tempTop = top * (factor);
 
 						objects[i].scaleX = tempScaleX;
 						objects[i].scaleY = tempScaleY;
 						objects[i].left = tempLeft;
-						//objects[i].top = tempTop;
+						objects[i].top = tempTop;
 
 						objects[i].setCoords();
 					}
@@ -382,7 +382,9 @@ TODO: improve the width and height of the component depending on the parameter r
 				this.canvas.setWidth(this.video.offsetWidth);
 				this.canvas.renderAll();
 				this.canvas.calcOffset();
-			}		
+			}
+			this.canvas.freeDrawingBrush.width = 15;
+			this.canvas.freeDrawingBrush.color = '#FFF000';	
 		},
 		clearCanvas: function(){
 			this.canvas.clear();
