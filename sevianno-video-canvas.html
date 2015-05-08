@@ -133,9 +133,9 @@ TODO: improve the width and height of the component depending on the parameter r
 		*
 		*@attribute heightvideo
 		*@type integer
-		*@default '240'
+		*@default '260'
 		*/
-		height: 500,
+		height: 260,
 		
 		/**
 		* The source of the video to be played.
@@ -189,25 +189,15 @@ TODO: improve the width and height of the component depending on the parameter r
 		domReady: function() {
 		this.video = this.$.video;
 		this.video.onended = this.ended.bind(this);
-		<!-- this.video.addEventListener('play', this.play.bind(this), true); -->
-		<!--this.video.addEventListener('pause', this.pause.bind(this), true); -->
 		this.video.addEventListener("timeupdate", this.timeupdate.bind(this), true);
 		this.video.addEventListener("progress", this.progress.bind(this), true);
 		this.video.addEventListener("canplay", this.canplay.bind(this), true);
-		<!--this.video.addEventListener("volumechange", this.volumechange.bind(this), true);-->
-		<!--this.video.addEventListener("waiting", this.waiting.bind(this), true);-->
 		this.video.addEventListener("playing", this.playing.bind(this), true);
-		//this.width = this.video.videoWidth;
-		console.log(this.video.offsetHeight);
-		//this.height = this.video.videoHeight;
-		console.log(this.video.offsetWidth);
-		
 		
 		this.canvas = this.__canvas = new fabric.Canvas(this.$.c);
 		this.canvas.isDrawingMode = true;
 		this.canvas.freeDrawingBrush.width = 15;
 		this.canvas.freeDrawingBrush.color = '#FFF000';
-		var video = this.$.video;
 		var pauseSignal = this.pauseClick.bind(this);
 		var sendAnnotationFunction = this.sendAnnotation.bind(this);
 		this.canvas.on('mouse:down', function(){
@@ -216,6 +206,9 @@ TODO: improve the width and height of the component depending on the parameter r
 		this.canvas.on('mouse:up', function(){
 										 sendAnnotationFunction();
 											});
+		console.log(this.$.video.offsetHeight);
+		console.log(this.$.video.offsetWidth);									
+		//this.resizeCanvas();
 		},
 		
 		/**
@@ -232,10 +225,12 @@ TODO: improve the width and height of the component depending on the parameter r
 			this.fire('core-signal', { name: "pause" });
 		},
 		play: function() {
+			console.log("play event");
 			this.video.play();
 			this.resizeCanvas();
 		},
 		pause: function() {
+		console.log("pause event");
 			this.video.pause();
 			this.resizeCanvas();
 		},
@@ -287,6 +282,7 @@ TODO: improve the width and height of the component depending on the parameter r
 		// when the time of the video changes
 			if(this.video){
 				this.video.currentTime = this.time;
+				this.clearCanvas();
 				this.video.play();
 			}
 		},
@@ -307,27 +303,36 @@ TODO: improve the width and height of the component depending on the parameter r
 			this.reset();
 		},
 			
-		showAnnotation: function(e, Sdetail, sender) {
+		showAnnotation: function(e, detail, sender) {
+		console.log("Show Annotation called");
+		console.log(detail);
 			this.time = detail.time;
 			this.jsonAnnotation = detail.jsonvideo;
 			var pauseSignal = this.pauseClick.bind(this);
 			var playSignal = this.playClick.bind(this);
+			var clearCanvas = this.clearCanvas.bind(this);
 			pauseSignal();
+			this.canvas.loadFromJSON(this.jsonAnnotation, this.canvas.renderAll.bind(this.canvas), function(o, object) {
+			fabric.log(o, object);
+			});	
 			// Now create a timer so in 10 second (1s = 1000 so 10s = 10000 ms) it will pause the video.
 			setTimeout(function(){
 				playSignal(); 
+				clearCanvas();
 			},5000);
 		},
 		reset: function() {
 				this.resizeCanvas();
 		},
 		jsonAnnotationChanged: function() {
+			console.log("jsonAnnotationChanged Called")
 			this.canvas.loadFromJSON(this.jsonAnnotation, this.canvas.renderAll.bind(this.canvas), function(o, object) {
 			fabric.log(o, object);
 			});	
 			this.pauseVideo();
 			
 		},
+		
 		/**
 		* This function is used to play pause the video.
 		*/
@@ -342,7 +347,8 @@ TODO: improve the width and height of the component depending on the parameter r
 		}
 		},
 		sendAnnotation: function() {
-			var valuePercentage = (this.video.currentTime / this.video.duration) ;
+			console.log("send Annotation called");
+			var valuePercentage = (this.video.currentTime / this.video.duration)*100 ;
 			console.log(valuePercentage);
 			var annotation;
 			annotation = {
@@ -352,7 +358,7 @@ TODO: improve the width and height of the component depending on the parameter r
 			annotationJson : JSON.stringify(this.canvas)
 			};
 			this.fire('core-signal', { name: 'add-annotation', data: annotation });
-		//console.log(dataJson);
+		console.log(annotation);
 		},
 		resizeCanvas: function(){		
 			if (this.canvas) {
