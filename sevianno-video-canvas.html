@@ -353,6 +353,7 @@ The set of parameters is subject of change since all the properties of this comp
 			annotation = {
 			title : "New title",
 			time : this.video.currentTime,
+			SMPTE: this.toSMPTE(this.video.currentTime),
 			value: valuePercentage,
 			annotationJson : JSON.stringify(this.canvas)
 			};
@@ -400,6 +401,19 @@ The set of parameters is subject of change since all the properties of this comp
 		},
 		clearTimeoutP: function(){
 			clearTimeout(this.timer);
+		},
+		toSMPTE: function(currentTime) {
+			var fps = 25;
+			var frameNumber = Math.round(Number(currentTime * fps));
+			console.log(frameNumber);
+			function wrap(n) { return ((n < 10) ? '0' + n : n); }
+			var _hour = ((fps * 60) * 60), _minute = (fps * 60);
+			var _hours = (frameNumber / _hour).toFixed(0);
+			var _minutes = (Number((frameNumber / _minute).toString().split('.')[0]) % 60);
+			var _seconds = (Number((frameNumber / fps).toString().split('.')[0]) % 60);
+			var SMPTE = (wrap(_hours) + ':' + wrap(_minutes) + ':' + wrap(_seconds) + '.' + wrap(frameNumber % fps) );
+			console.log(SMPTE);
+			return SMPTE;
 		}
 		});
 	</script>
