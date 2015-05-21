@@ -58,54 +58,62 @@ The set of parameters is subject of change since all the properties of this comp
 
 -->
 
-<polymer-element name="sevianno-video-canvas" attributes="padding src width height time jsonAnnotation">
-	<template>
+<polymer-element name="sevianno-video-canvas" attributes="padding src width height time jsonAnnotation intermission">
+  <template>
 
-		<div id="content-container" horizontal layout center flex>
-			<video id="video" muted="" preload="auto" src={{src}}></video> 
-			<canvas id="c" width={{width}} height={{height}} style="cursor: crosshair;"></canvas>
-		<div>
-		<core-signals on-core-signal-play="{{play}}"></core-signals>
-		<core-signals on-core-signal-pause="{{pause}}"></core-signals>
-		<core-signals on-core-signal-change="{{change}}"></core-signals>
-		<core-signals on-core-signal-show-annotation="{{showAnnotation}}"></core-signals>
+	<div id="content-container" horizontal layout center flex>
+		<video id="video" muted="" preload="auto" src={{src}}></video> 
 		
-		<style>
-		:host {
-			display: inline-block;
-			width:{{width}};
-							}
-		#content-container {
-			position: relative;
-			/*height: {{canvasHeight}}px;
-			width: {{canvasWidth}}px;*/
-			overflow: hidden;
-		}
+		<canvas id="c" width={{width}} height={{height}} style="cursor: crosshair;"></canvas>
+		
+	<div>
+	<core-signals on-core-signal-play="{{play}}"></core-signals>
+	<core-signals on-core-signal-pause="{{pause}}"></core-signals>
+	<core-signals on-core-signal-change="{{change}}"></core-signals>
+	<core-signals on-core-signal-show-annotation="{{showAnnotation}}"></core-signals>
 
-		video {
-			position: absolute;
-			top: 0px;
-			left: 0px;
-			width: 100%;
-		}
-		canvas {
-		display: block;
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		width: 100%;
-		}	
-		</style>
-	</template>
-  	<script>
+	<style>
+			:host {
+				display: inline-block;
+				width:{{width}};
+								}
+			#content-container {
+				position: relative;
+				/*height: {{canvasHeight}}px;
+				width: {{canvasWidth}}px;*/
+				overflow: hidden;
+			}
+			
+			video {
+				position: absolute;
+				top: 0px;
+				left: 0px;
+				width: 100%;
+			}
+			canvas {
+				display: block;
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				width: 100%;
+            }
+			
+	</style>
+
+  </template>
+  
+
+	<script>
+
 		Polymer({
 		/**
 		* Fired when the component is ready for showing the video.
 		*
 		* @event sevianno-video-canvas-domReady
 		*/
+	
 	
 		/**
 		* The width of the video to be played.
@@ -173,6 +181,8 @@ The set of parameters is subject of change since all the properties of this comp
 		*/
 		video:null,
 		
+		intermission:5000,
+		
 		
 		domReady: function() {
 		this.video = this.$.video;
@@ -194,8 +204,7 @@ The set of parameters is subject of change since all the properties of this comp
 		this.canvas.on('mouse:up', function(){
 										 sendAnnotationFunction();
 											});
-		console.log(this.$.video.offsetHeight);
-		console.log(this.$.video.offsetWidth);									
+								
 		//this.resizeCanvas();
 		},
 		
@@ -203,8 +212,8 @@ The set of parameters is subject of change since all the properties of this comp
 		* Computes parameters used for the template.
 		*/
 		computed: {
-			canvasWidth: 'width + 2*padding',
-			canvasHeight: 'height + 2*padding'		
+        canvasWidth: 'width + 2*padding',
+		canvasHeight: 'height + 2*padding'		
 		},
 		playClick: function () {
 			this.fire('core-signal', { name: "play" });
@@ -213,13 +222,11 @@ The set of parameters is subject of change since all the properties of this comp
 			this.fire('core-signal', { name: "pause" });
 		},
 		play: function() {
-			console.log("play event");
 			this.video.play();
 			this.clearCanvas();
 			this.resizeCanvas();
 		},
 		pause: function() {
-			console.log("pause event");
 			this.video.pause();
 			this.resizeCanvas();
 		},
@@ -240,6 +247,7 @@ The set of parameters is subject of change since all the properties of this comp
 			this.fire('core-signal', { name: 'progress-amount', data: progress_amount });
 		},
 		canplay: function() {
+			this.resizeCanvas();
 			this.fire('core-signal', { name: 'canplay' });
 		},
 		waiting: function() {
@@ -277,17 +285,22 @@ The set of parameters is subject of change since all the properties of this comp
 			}
 		},
 		widthChanged: function() {
+		// when the time of the video changes
 			this.reset();
 		},
 		heightChanged: function() {
+		// when the time of the video changes
 			this.reset();
 		},
 		paddingChanged: function() {
+		// when the padding of the canvas changes
 			this.reset();
 		},
 		srcChanged: function() {
+		// when the source of the video changes
 			this.reset();
 		},
+			
 		showAnnotation: function(e, detail, sender) {
 			this.time = detail.time;
 			this.jsonAnnotation = detail.jsonvideo;
@@ -299,10 +312,12 @@ The set of parameters is subject of change since all the properties of this comp
 			fabric.log(o, object);
 			});
 			
+			// Now create a timer so in 10 second (1s = 1000 so 10s = 10000 ms) it will pause the video.
 			setTimeout(function(){
 				playSignal(); 
 				clearCanvas();
-			},5000);
+			},this.intermission);
+			
 		},
 		reset: function() {
 				this.resizeCanvas();
@@ -314,18 +329,32 @@ The set of parameters is subject of change since all the properties of this comp
 			});	
 			this.pauseVideo();
 		},
+		
+		/**
+		* This function is used to play pause the video.
+		*/
+		playPause: function () {
+			if (this.video.paused == true) {
+			this.video.currentTime = this.time;
+			this.video.play();
+			this.clearCanvas();
+			} else {
+			this.video.pause();
+			}
+		},
 		sendAnnotation: function() {
 			console.log("send Annotation called");
 			var valuePercentage = (this.video.currentTime / this.video.duration)*100 ;
 			console.log(valuePercentage);
 			var annotation;
 			annotation = {
-				title : "New title",
-				time : this.video.currentTime,
-				value: valuePercentage,
-				annotationJson : JSON.stringify(this.canvas)
+			title : "New title",
+			time : this.video.currentTime,
+			value: valuePercentage,
+			annotationJson : JSON.stringify(this.canvas)
 			};
 			this.fire('core-signal', { name: 'add-annotation', data: annotation });
+		console.log(annotation);
 		},
 		resizeCanvas: function(){		
 			if (this.canvas) {
@@ -376,7 +405,7 @@ The set of parameters is subject of change since all the properties of this comp
 			setTimeout(function(){
 				playSignal();
 				clearCanvas();
-			},5000);
+			},this.intermission);
 		}
 		});
 	</script>
