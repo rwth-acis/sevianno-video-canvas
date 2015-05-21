@@ -72,6 +72,10 @@ The set of parameters is subject of change since all the properties of this comp
 	<core-signals on-core-signal-change="{{change}}"></core-signals>
 	<core-signals on-core-signal-show-annotation="{{showAnnotation}}"></core-signals>
 
+<!--
+CSS styling
+TODO: improve the width and height of the component depending on the parameter received by the component
+-->
 	<style>
 			:host {
 				display: inline-block;
@@ -281,7 +285,9 @@ The set of parameters is subject of change since all the properties of this comp
 			if(this.video){
 				this.video.currentTime = this.time;
 				this.clearCanvas();
-				this.video.play();
+				if (this.video.played == true) 
+					this.video.play();
+				
 			}
 		},
 		widthChanged: function() {
@@ -307,27 +313,26 @@ The set of parameters is subject of change since all the properties of this comp
 			var pauseSignal = this.pauseClick.bind(this);
 			var playSignal = this.playClick.bind(this);
 			var clearCanvas = this.clearCanvas.bind(this);
-			pauseSignal();
-			this.canvas.loadFromJSON(this.jsonAnnotation, this.canvas.renderAll.bind(this.canvas), function(o, object) {
-			fabric.log(o, object);
-			});
-			
-			// Now create a timer so in 10 second (1s = 1000 so 10s = 10000 ms) it will pause the video.
-			setTimeout(function(){
-				playSignal(); 
-				clearCanvas();
-			},this.intermission);
+			if (this.video.paused == false) {
+				pauseSignal();
+				this.canvas.loadFromJSON(this.jsonAnnotation, this.canvas.renderAll.bind(this.canvas), function(o, object) {
+				fabric.log(o, object);
+				});
+				// Now create a timer so in 10 second (1s = 1000 so 10s = 10000 ms) it will pause the video.
+				setTimeout(function(){
+					playSignal(); 
+					clearCanvas();
+				},this.intermission);
+			} else {
+				this.canvas.loadFromJSON(this.jsonAnnotation, this.canvas.renderAll.bind(this.canvas), function(o, object) {
+				fabric.log(o, object);
+				});
+				
+			}	
 			
 		},
 		reset: function() {
 				this.resizeCanvas();
-		},
-		jsonAnnotationChanged: function() {
-			console.log("jsonAnnotationChanged Called")
-			this.canvas.loadFromJSON(this.jsonAnnotation, this.canvas.renderAll.bind(this.canvas), function(o, object) {
-			fabric.log(o, object);
-			});	
-			this.pauseVideo();
 		},
 		
 		/**
@@ -343,9 +348,7 @@ The set of parameters is subject of change since all the properties of this comp
 			}
 		},
 		sendAnnotation: function() {
-			console.log("send Annotation called");
 			var valuePercentage = (this.video.currentTime / this.video.duration)*100 ;
-			console.log(valuePercentage);
 			var annotation;
 			annotation = {
 			title : "New title",
@@ -354,7 +357,6 @@ The set of parameters is subject of change since all the properties of this comp
 			annotationJson : JSON.stringify(this.canvas)
 			};
 			this.fire('core-signal', { name: 'add-annotation', data: annotation });
-		console.log(annotation);
 		},
 		resizeCanvas: function(){		
 			if (this.canvas) {
@@ -395,17 +397,6 @@ The set of parameters is subject of change since all the properties of this comp
 			this.canvas.freeDrawingBrush = new fabric['PencilBrush'](this.canvas);
 			this.canvas.freeDrawingBrush.width = 10;
 			this.canvas.freeDrawingBrush.color = '#FF0000';
-		},
-		pauseVideo: function(){
-			var pauseSignal = this.pauseClick.bind(this);
-			var playSignal = this.playClick.bind(this);
-			var clearCanvas = this.clearCanvas.bind(this);
-			pauseSignal();
-			// Now create a timer so in 10 second (1s = 1000 so 10s = 10000 ms) it will pause the video.
-			setTimeout(function(){
-				playSignal();
-				clearCanvas();
-			},this.intermission);
 		}
 		});
 	</script>
