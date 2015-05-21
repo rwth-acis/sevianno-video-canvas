@@ -29,7 +29,6 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
 
-<!--<link rel="import" href="sevianno-video-canvas/bower_components/core-icon-button/core-icon-button.html">-->
 <link rel="import" href="../polymer/polymer.html">
 
 
@@ -72,10 +71,6 @@ The set of parameters is subject of change since all the properties of this comp
 	<core-signals on-core-signal-change="{{change}}"></core-signals>
 	<core-signals on-core-signal-show-annotation="{{showAnnotation}}"></core-signals>
 
-<!--
-CSS styling
-TODO: improve the width and height of the component depending on the parameter received by the component
--->
 	<style>
 			:host {
 				display: inline-block;
@@ -187,6 +182,8 @@ TODO: improve the width and height of the component depending on the parameter r
 		
 		intermission:5000,
 		
+		timer: null,
+		
 		
 		domReady: function() {
 		this.video = this.$.video;
@@ -202,7 +199,9 @@ TODO: improve the width and height of the component depending on the parameter r
 		this.canvas.freeDrawingBrush.color = '#FFF000';
 		var pauseSignal = this.pauseClick.bind(this);
 		var sendAnnotationFunction = this.sendAnnotation.bind(this);
+		var clearTimeoutFunction = this.clearTimeoutP.bind(this);
 		this.canvas.on('mouse:down', function(){
+										clearTimeoutFunction();
 										pauseSignal();
 										});
 		this.canvas.on('mouse:up', function(){
@@ -319,7 +318,7 @@ TODO: improve the width and height of the component depending on the parameter r
 				fabric.log(o, object);
 				});
 				// Now create a timer so in 10 second (1s = 1000 so 10s = 10000 ms) it will pause the video.
-				setTimeout(function(){
+				this.timer = setTimeout(function(){
 					playSignal(); 
 					clearCanvas();
 				},this.intermission);
@@ -328,7 +327,8 @@ TODO: improve the width and height of the component depending on the parameter r
 				fabric.log(o, object);
 				});
 				
-			}	
+			}
+			//this.timer = null;
 			
 		},
 		reset: function() {
@@ -397,6 +397,9 @@ TODO: improve the width and height of the component depending on the parameter r
 			this.canvas.freeDrawingBrush = new fabric['PencilBrush'](this.canvas);
 			this.canvas.freeDrawingBrush.width = 10;
 			this.canvas.freeDrawingBrush.color = '#FF0000';
+		},
+		clearTimeoutP: function(){
+			clearTimeout(this.timer);
 		}
 		});
 	</script>
