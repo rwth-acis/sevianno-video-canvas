@@ -200,13 +200,18 @@ The set of parameters is subject of change since all the properties of this comp
 		var pauseSignal = this.pauseClick.bind(this);
 		var sendAnnotationFunction = this.sendAnnotation.bind(this);
 		var clearTimeoutFunction = this.clearTimeoutP.bind(this);
+		this.canvas.on('touch:drag', function(){
+										console.log("touch start");
+											});
 		this.canvas.on('mouse:down', function(){
 										clearTimeoutFunction();
 										pauseSignal();
 										});
 		this.canvas.on('mouse:up', function(){
+										console.log("touch fnished");
 										 sendAnnotationFunction();
 											});
+		
 								
 		//this.resizeCanvas();
 		},
@@ -411,8 +416,10 @@ The set of parameters is subject of change since all the properties of this comp
 			var _hours = (frameNumber / _hour).toFixed(0);
 			var _minutes = (Number((frameNumber / _minute).toString().split('.')[0]) % 60);
 			var _seconds = (Number((frameNumber / fps).toString().split('.')[0]) % 60);
-			var SMPTE = (wrap(_hours) + ':' + wrap(_minutes) + ':' + wrap(_seconds) + '.' + wrap(frameNumber % fps) );
+			var SMPTE = (wrap(_hours) + ':' + wrap(_minutes) + ':' + wrap(_seconds) + ';' + wrap(frameNumber % fps) ) ;
+			var encodedSMPTE = encodeURIComponent(SMPTE).replace(/'/g,"%27").replace(/"/g,"%22");
 			console.log(SMPTE);
+			//console.log(encodedSMPTE);
 			return SMPTE;
 		}
 		});
