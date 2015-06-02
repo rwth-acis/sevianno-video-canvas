@@ -11,6 +11,7 @@
     "canvas",
     "drawing"
   ],
+  "main": "sevianno-video-canvas.html",
   "license": "Apache 2.0",
   "ignore": [
     "**/.*",
@@ -20,7 +21,7 @@
     "tests"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#^0.5",
+    "polymer": "Polymer/polymer#0.5",
     "fabric": "~1.4.13"
   }
 }

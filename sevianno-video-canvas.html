@@ -29,23 +29,24 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
 
-<!--<link rel="import" href="sevianno-video-canvas/bower_components/core-icon-button/core-icon-button.html">-->
 <link rel="import" href="../polymer/polymer.html">
 
 
 <script type="text/javascript" src="../fabric/dist/fabric.js"></script>
+<link rel="import" href="../core-signals/core-signals.html">
 <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
 <!--
 `sevianno-video-canvas` is a web component that play videos and shows drawing annotations.
 
 ##### Example
 <sevianno-video-canvas id = "seviannoVideoCanvas" 
-paddingcanvas="100" 
-sourcevideo="http://golovin.de/ba/parking.mp4"  
-widthvideo="640" 
-heightvideo="300" 
-preloadvideo="auto" 
-timevideo="10">
+padding="100"
+src="http://golovin.de/ba/parking.mp4"
+width="640"
+height="300"
+preload="auto"
+time="10"
+intermission="3000">
 </sevianno-video-canvas>
 
 The set of parameters is subject of change since all the properties of this component are not yet defined.
@@ -57,41 +58,47 @@ The set of parameters is subject of change since all the properties of this comp
 
 -->
 
-<polymer-element name="sevianno-video-canvas" attributes="paddingcanvas sourcevideo widthvideo heightvideo preloadvideo timevideo">
+<polymer-element name="sevianno-video-canvas" attributes="padding src width height time jsonAnnotation intermission">
   <template>
 
-	<div id="content-container">
-		<video id="video" muted="" width={{widthvideo}} height={{heightvideo}} preload={{preloadvideo}} src={{sourcevideo}} ></video> 
-		<canvas id="c" height={{canvasHeight}} width={{canvasWidth}} style="border: 1px solid rgb(170, 170, 170);height: {{canvasHeight}}px; width: {{canvasWidth}}px; cursor: crosshair;"></canvas>
+	<div id="content-container" horizontal layout center flex>
+		<video id="video" muted="" preload="auto" src={{src}}></video> 
+		
+		<canvas id="c" width={{width}} height={{height}} style="cursor: crosshair;"></canvas>
+		
 	<div>
+	<core-signals on-core-signal-play="{{play}}"></core-signals>
+	<core-signals on-core-signal-pause="{{pause}}"></core-signals>
+	<core-signals on-core-signal-change="{{change}}"></core-signals>
+	<core-signals on-core-signal-show-annotation="{{showAnnotation}}"></core-signals>
 
-<!--
-CSS styling
-TODO: improve the width and height of the component depending on the parameter received by the component
--->
 	<style>
 			:host {
-				display: block;
-				float:right;
-				}
+				display: inline-block;
+				width:{{width}};
+								}
 			#content-container {
 				position: relative;
-				height: {{canvasHeight}}px;
-				width: {{canvasWidth}}px;
-				clear: both;
+				/*height: {{canvasHeight}}px;
+				width: {{canvasWidth}}px;*/
+				overflow: hidden;
 			}
-			canvas {
+			
+			video {
 				position: absolute;
 				top: 0px;
 				left: 0px;
+				width: 100%;
 			}
-			video {
-				width: {{widthvideo}}px;
-				height: {{heightvideo}}px;
+			canvas {
+				display: block;
 				position: absolute;
-				top: {{paddingcanvas}}px;
-				left: {{paddingcanvas}}px;
-			}
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				width: 100%;
+            }
 			
 	</style>
 
@@ -101,11 +108,16 @@ TODO: improve the width and height of the component depending on the parameter r
 	<script>
 
 		Polymer({
-		/**
-		* Fired when the component is ready for showing the video.
-		*
-		* @event sevianno-video-canvas-domReady
-		*/
+
+			/**
+			 * The `authors` attribute sets contributors author
+			 *
+			 * @attribute authors
+			 * @type array
+			 * @default ['Bujar Bakiu','István Koren']
+			 */
+			authors: ['Bujar Bakiu', 'István Koren'],
+		
 	
 	
 		/**
@@ -115,25 +127,25 @@ TODO: improve the width and height of the component depending on the parameter r
 		*@type integer
 		*@default '320'
 		*/
-		widthvideo: 320,
+		width: 320,
 		
 		/**
 		* The height of the video to be played.
 		*
 		*@attribute heightvideo
 		*@type integer
-		*@default '240'
+		*@default '260'
 		*/
-		heightvideo: 240,
+		height: 260,
 		
 		/**
 		* The source of the video to be played.
 		*
-		*@attribute sourcevidoe
+		*@attribute src
 		*@type string
 		*@default 'http://golovin.de/ba/parking.mp4'
 		*/
-		sourcevideo:'http://golovin.de/ba/parking.mp4',
+		src:'http://golovin.de/ba/parking.mp4',
 		
 		/**
 		* This attribute shows the white margin on the video, where the user can draw.
@@ -142,7 +154,7 @@ TODO: improve the width and height of the component depending on the parameter r
 		*@type integer
 		*@default '3'
 		*/
-		paddingcanvas:3,
+		padding:3,
 		
 		/**
 		* This attribute in an FabricJS canvas object. This is used for the user to 
@@ -158,11 +170,11 @@ TODO: improve the width and height of the component depending on the parameter r
 		* This attribute is the time when the video should start playing. It is designed that when the user
 		* selects one annotation, the video start playing at the moment of the annotation.
 		*
-		*@attribute timevideo
+		*@attribute time
 		*@type integer
 		*@default '3'
 		*/
-		timevideo:0,
+		time:0,
 		
 		/**
 		* This attribute in an video object. This is used for the video object in the component,
@@ -173,111 +185,299 @@ TODO: improve the width and height of the component depending on the parameter r
 		*@default null
 		*/
 		video:null,
+
+		/**
+		 * The `intermission` attribute is an integer that shows the time in milliseconds the video should pause to show the annotation.
+		 *
+		 * @attribute intermission
+		 * @type integer
+		 * @default 3000
+		 */
+		intermission:3000,
+
+		/**
+		 * The timer is an object used to stop the time of showing an annotation when the user start drawing anothe annotation.
+		 */
+		timer: null,
 		
-		
+		/**
+		 * domReady is called when the DOM elements are loaded.
+		 * It initialises the canvas, video and adds some eventListeners to the video.
+		 * Also resizes the canvas to the dimensions of the video and enables the drawing on the canvas.
+		 */
 		domReady: function() {
 		this.video = this.$.video;
-		this.canvas = this.__canvas = new fabric.Canvas(this.$.c, {
+		this.video.onended = this.ended.bind(this);
+		this.video.addEventListener("timeupdate", this.timeupdate.bind(this), true);
+		this.video.addEventListener("progress", this.progress.bind(this), true);
+		this.video.addEventListener("canplay", this.canplay.bind(this), true);
+		this.video.addEventListener("playing", this.playing.bind(this), true);
 		
-			isDrawingMode: true
-		});
-			this.canvas.freeDrawingBrush.width = 10;
-			this.canvas.freeDrawingBrush.color = '#FF0000';
-			console.log(this.canvas);
+		this.canvas = this.__canvas = new fabric.Canvas(this.$.c);
+		this.canvas.isDrawingMode = true;
+		this.canvas.freeDrawingBrush.width = 15;
+		this.canvas.freeDrawingBrush.color = '#FFF000';
+		var pauseSignal = this.pauseClick.bind(this);
+		var sendAnnotationFunction = this.sendAnnotation.bind(this);
+		var clearTimeoutFunction = this.clearTimeoutFunction.bind(this);
+		this.canvas.on('touch:drag', function(){
+										console.log("touch start");
+											});
+		this.canvas.on('mouse:down', function(){
+										clearTimeoutFunction();
+										pauseSignal();
+										});
+		this.canvas.on('mouse:up', function(){
+										console.log("touch fnished");
+										 sendAnnotationFunction();
+											});
+		
+								
 		},
 		
 		/**
 		* Computes parameters used for the template.
 		*/
 		computed: {
-        canvasWidth: 'widthvideo + 2*paddingcanvas',
-		canvasHeight: 'heightvideo + 2*paddingcanvas'		
+        canvasWidth: 'width + 2*padding',
+		canvasHeight: 'height + 2*padding'		
 		},
-		
+		playClick: function () {
+			this.fire('core-signal', { name: "play" });
+		},
+		pauseClick: function() {
+			this.fire('core-signal', { name: "pause" });
+		},
+		play: function() {
+			this.video.play();
+			this.clearCanvas();
+			this.resizeCanvas();
+		},
+		pause: function() {
+			this.video.pause();
+		},
+		ended: function() {  },
+
+		/**
+		 * timeupdate event is fired ever 250 ms in the chrome browser.
+		 * We use this to update the value of the slider at sevianno-video-controller component, and also check for
+		 * annotations at the sevianno-annotation-list component.
+		 */
+		timeupdate: function() {
+			if(this.video.duration <= 0) return;
+			var time = this.video.currentTime;
+			var value = (100 / this.video.duration) * this.video.currentTime;
+			var timeValue = {time:this.video.currentTime,
+							 sliderValue:value };
+			this.fire('core-signal', { name: 'timeupdate', data: timeValue });
+		},
+		progress: function() {  
+			if(this.video.duration <= 0 || this.video.buffered.length === 0) return;
+			var buffered_end = this.video.buffered.end(this.video.buffered.length - 1);
+			var progress_amount = (buffered_end / this.video.duration) * 100;
+			this.fire('core-signal', { name: 'progress-amount', data: progress_amount });
+		},
+		/**
+		 * This is used to resize the canvas at the begining of the video play.
+		 */
+		canplay: function() {
+			this.resizeCanvas();
+			this.fire('core-signal', { name: 'canplay' });
+		},
+		waiting: function() {
+			this.hiddenWaitingScreen = false;
+		},
+		playing: function() {
+			this.hiddenWaitingScreen = true;
+		},
+		volumechange: function() {
+			if(this.video.muted) {
+			  this.fire('core-signal', { name: 'volumechange', data: 0 });
+			  this.video.muted = false;
+			}
+			else this.fire('core-signal', { name: 'volumechange', data: this.video.volume*100 });
+		},
+		change: function(e, detail, sender) {
+			if(isNaN(this.video.duration)) return;
+			this.video.currentTime = this.video.duration * (detail / 100);
+			this.clearCanvas();
+			},
+			volume: function(e, detail, sender) {
+			this.video.volume = detail;
+		},
+
 		/**
 		* When the time of the video is changed, this function catches this event.
 		* This can be used for all other attributes that the component has defined.
 		*/
-		timevideoChanged: function() {
-        // when the time of the video changes
-		if(this.video){
-		this.video.currentTime = this.timevideo;
-		this.video.play();
-		}
+		timeChanged: function() {
+		// when the time of the video changes
+			if(this.video){
+				this.video.currentTime = this.time;
+				this.clearCanvas();
+				if (this.video.played == true) 
+					this.video.play();
+				
+			}
 		},
-		widthvideoChanged: function() {
-        // when the time of the video changes
-		console.log(this.widthvideo);
-		this.reset();
+		widthChanged: function() {
+		// when the time of the video changes
+			this.reset();
 		},
-		heightvideoChanged: function() {
-        // when the time of the video changes
-		
-		console.log(this.heightvideo);
-		this.reset();
+		heightChanged: function() {
+		// when the time of the video changes
+			this.reset();
 		},
-		paddingcanvasChanged: function() {
-        // when the padding of the canvas changes
-		console.log(this.paddingcanvas);
-		this.reset();
+		paddingChanged: function() {
+		// when the padding of the canvas changes
+			this.reset();
 		},
-		sourcevideoChanged: function() {
-        // when the source of the video changes
-		console.log(this.sourcevideo);
-		//this.reset();
+		srcChanged: function() {
+		// when the source of the video changes
+			this.reset();
 		},
-		preloadvideoChanged: function() {
-        // when the preload of the video changes
-		console.log(this.preloadvideo);
-		//this.reset();
+
+		/**
+		 * This method is called to show an annotation.
+		 * It shows the annotation and also does not change the state of the video.
+		 */
+		showAnnotation: function(e, detail, sender) {
+			this.time = detail.time;
+			this.jsonAnnotation = detail.jsonvideo;
+			var pauseSignal = this.pauseClick.bind(this);
+			var playSignal = this.playClick.bind(this);
+			var clearCanvas = this.clearCanvas.bind(this);
+			if (this.video.paused == false) {
+				pauseSignal();
+				this.canvas.loadFromJSON(this.jsonAnnotation, this.canvas.renderAll.bind(this.canvas), function(o, object) {
+				fabric.log(o, object);
+				});
+				// Now create a timer so in 10 second (1s = 1000 so 10s = 10000 ms) it will pause the video.
+				this.timer = setTimeout(function(){
+					playSignal(); 
+					clearCanvas();
+				},this.intermission);
+			} else {
+				this.canvas.loadFromJSON(this.jsonAnnotation, this.canvas.renderAll.bind(this.canvas), function(o, object) {
+				fabric.log(o, object);
+				});
+				
+			}
+			//this.timer = null;
+			
 		},
-		
-		getJSON: function() {
-		console.log("Get JSON on the component");
-		var canvasJSON = JSON.stringify(this.canvas);
-		this.fire('video-canvas-get-JSON', {canvas:canvasJSON});
-		//console.log(canvasJSON);
-		},
+
+		/**
+		 * When attributes change we resize the canvas to the new attributes.
+		 */
 		reset: function() {
-		console.log("reset called");
-		
-		if (this.canvas) {
-		this.canvas.setHeight(this.canvasHeight);
-		this.canvas.setWidth(this.canvasWidth);
-		this.canvas.renderAll();
-		this.canvas.calcOffset();
-		console.log(this.canvas);
-		}
-		
+				this.resizeCanvas();
 		},
 		
-		setJSON: function(canvasJSON) {
-		if(canvasJSON)
-		{
-			this.canvas.loadFromJSON(canvasJSON, this.canvas.renderAll.bind(this.canvas), function(o, object) {
-			fabric.log(o, object);
-			console.log("setJSON called.");
-			});
-		}
-		
-		},
-	  /**
-	  * This function is used to play pause the video.
-	  */
+		/**
+		* This function is used to play pause the video.
+		*/
 		playPause: function () {
-		if (this.video.paused == true) {
-		// Play the video
-		this.video.currentTime = this.timevideo;
-		this.video.play();
-		
-		console.log(this.canvas);
-		console.log(JSON.stringify(this.canvas));
-		} else {
-		// Pause the video
-		this.video.pause();
+			if (this.video.paused == true) {
+			this.video.currentTime = this.time;
+			this.video.play();
+			this.clearCanvas();
+			} else {
+			this.video.pause();
+			}
+		},
+
+			/**
+			 * Send annotation is used to fire an signal that a new annotation was added.
+			 */
+		sendAnnotation: function() {
+			var valuePercentage = (this.video.currentTime / this.video.duration)*100 ;
+			var annotation;
+			annotation = {
+			title : "New title",
+			time : this.video.currentTime,
+			SMPTE: this.toSMPTE(this.video.currentTime),
+			value: valuePercentage,
+			annotationJson : JSON.stringify(this.canvas)
+			};
+			this.fire('core-signal', { name: 'add-annotation', data: annotation });
+		},
+			/**
+			 * ResizeCanvas resizes the canvas dimensions as well as the drawing that is already in it.
+			 */
+		resizeCanvas: function(){		
+			if (this.canvas) {
+				var factor = this.video.offsetWidth/(this.canvas.getWidth());
+				if(factor!=1){
+				var objects = this.canvas.getObjects();
+					for (var i in objects) {
+						var scaleX = objects[i].scaleX;
+						var scaleY = objects[i].scaleY;
+						var left = objects[i].left;
+						var top = objects[i].top;
+
+						var tempScaleX = scaleX * factor;
+						var tempScaleY = scaleY * factor;
+						var tempLeft = left * (factor);
+						var tempTop = top * (factor);
+
+						objects[i].scaleX = tempScaleX;
+						objects[i].scaleY = tempScaleY;
+						objects[i].left = tempLeft;
+						objects[i].top = tempTop;
+
+						objects[i].setCoords();
+					}
+				}
+				this.canvas.setHeight(this.video.offsetHeight);
+				this.canvas.setWidth(this.video.offsetWidth);
+				this.canvas.renderAll();
+				this.canvas.calcOffset();
+			}
+			this.canvas.freeDrawingBrush.width = 15;
+			this.canvas.freeDrawingBrush.color = '#FFF000';	
+		},
+			/**
+			 * Cleans the canvas
+			 */
+		clearCanvas: function(){
+			this.canvas.clear();
+		},
+		setCanvasProperties: function(){
+			this.canvas.freeDrawingBrush = new fabric['PencilBrush'](this.canvas);
+			this.canvas.freeDrawingBrush.width = 10;
+			this.canvas.freeDrawingBrush.color = '#FF0000';
+		},
+			/**
+			 * ClearTimeoutFunction is used to clear the timeout if one is active.
+			 * Its usecase is: when an annotation is shown and the video will start to play in few seconds. If user
+			 * starts drawing another annotation, the cleartimeout will cancel this timeout.
+			 */
+		clearTimeoutFunction: function(){
+			clearTimeout(this.timer);
+		},
+
+			/**
+			 * Converts the time of the video to SMPTE format
+			 * @param currentTime
+			 * @returns {string} which is the SMPTE string.
+			 */
+		toSMPTE: function(currentTime) {
+			var fps = 25;
+			var frameNumber = Math.round(Number(currentTime * fps));
+			console.log(frameNumber);
+			function wrap(n) { return ((n < 10) ? '0' + n : n); }
+			var _hour = ((fps * 60) * 60), _minute = (fps * 60);
+			var _hours = (frameNumber / _hour).toFixed(0);
+			var _minutes = (Number((frameNumber / _minute).toString().split('.')[0]) % 60);
+			var _seconds = (Number((frameNumber / fps).toString().split('.')[0]) % 60);
+			var SMPTE = (wrap(_hours) + ':' + wrap(_minutes) + ':' + wrap(_seconds) + ';' + wrap(frameNumber % fps) ) ;
+			var encodedSMPTE = encodeURIComponent(SMPTE).replace(/'/g,"%27").replace(/"/g,"%22");
+			console.log(SMPTE);
+			//console.log(encodedSMPTE);
+			return SMPTE;
 		}
-		}
-		
 		});
 	</script>
+	
 </polymer-element>
