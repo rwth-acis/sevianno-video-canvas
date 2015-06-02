@@ -14,31 +14,29 @@
 	<link rel="import" href="../polymer/polymer.html">
 </head>
 <body unresolved>
-	<div style="width:640px">
+	<div >
 	<sevianno-video-canvas
 		id = "seviannoVideoCanvas" 
 		padding="10" 
 		src="http://golovin.de/ba/parking.mp4"  
-		width="640" 
+		width="640"
+		height=""
 		time="10"
 		 >
 	</sevianno-video-canvas>
 	</div>
 	<div id="video-controls">
-		<button onclick="changeTime();">Go To second 5</button>
 		<button onclick="play();">Play/Pause</button>
 		<button onclick="setJSONindex();">Set JSON </button>
 		<button onclick="setAttributesVideoCanvas();">Set Attributes JSON </button>
 		<button onclick="setProperties();">Set Canvas Properties</button>
+		<button onclick="toSMPTE(301);">toSMPTE</button>
 	</div>
 	<script>
 	var component = document.getElementById("seviannoVideoCanvas");
 	document.addEventListener('video-canvas-get-JSON', function(e) {
         console.log(e.detail.canvas);
     });
-	function changeTime() {
-	component.setAttribute('timevideo', 5);
-	}
 	function play() {
 	component.play();
 	}
@@ -68,6 +66,18 @@
 	{
 	component.setCanvasProperties();
 	
+	}
+	
+	function toSMPTE(frame) {
+	var frameNumber = Number(frame);
+	var fps = 25;
+	function wrap(n) { return ((n < 10) ? '0' + n : n); }
+	var _hour = ((fps * 60) * 60), _minute = (fps * 60);
+	var _hours = (frameNumber / _hour).toFixed(0);
+	var _minutes = (Number((frameNumber / _minute).toString().split('.')[0]) % 60);
+	var _seconds = (Number((frameNumber / fps).toString().split('.')[0]) % 60);
+	var SMPTE = (wrap(_hours) + ':' + wrap(_minutes) + ':' + wrap(_seconds) + '.' + wrap(frameNumber % fps) );
+	console.log(SMPTE);
 	}
 	</script>
 </body>

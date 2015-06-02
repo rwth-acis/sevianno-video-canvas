@@ -40,12 +40,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ##### Example
 <sevianno-video-canvas id = "seviannoVideoCanvas" 
-paddingcanvas="100" 
-sourcevideo="http://golovin.de/ba/parking.mp4"  
-widthvideo="640" 
-heightvideo="300" 
-preloadvideo="auto" 
-timevideo="10">
+padding="100"
+src="http://golovin.de/ba/parking.mp4"
+width="640"
+height="300"
+preload="auto"
+time="10"
+intermission="3000">
 </sevianno-video-canvas>
 
 The set of parameters is subject of change since all the properties of this component are not yet defined.
@@ -107,11 +108,16 @@ The set of parameters is subject of change since all the properties of this comp
 	<script>
 
 		Polymer({
-		/**
-		* Fired when the component is ready for showing the video.
-		*
-		* @event sevianno-video-canvas-domReady
-		*/
+
+			/**
+			 * The `authors` attribute sets contributors author
+			 *
+			 * @attribute authors
+			 * @type array
+			 * @default ['Bujar Bakiu','István Koren']
+			 */
+			authors: ['Bujar Bakiu', 'István Koren'],
+		
 	
 	
 		/**
@@ -164,7 +170,7 @@ The set of parameters is subject of change since all the properties of this comp
 		* This attribute is the time when the video should start playing. It is designed that when the user
 		* selects one annotation, the video start playing at the moment of the annotation.
 		*
-		*@attribute timevideo
+		*@attribute time
 		*@type integer
 		*@default '3'
 		*/
@@ -179,12 +185,26 @@ The set of parameters is subject of change since all the properties of this comp
 		*@default null
 		*/
 		video:null,
-		
-		intermission:5000,
-		
+
+		/**
+		 * The `intermission` attribute is an integer that shows the time in milliseconds the video should pause to show the annotation.
+		 *
+		 * @attribute intermission
+		 * @type integer
+		 * @default 3000
+		 */
+		intermission:3000,
+
+		/**
+		 * The timer is an object used to stop the time of showing an annotation when the user start drawing anothe annotation.
+		 */
 		timer: null,
 		
-		
+		/**
+		 * domReady is called when the DOM elements are loaded.
+		 * It initialises the canvas, video and adds some eventListeners to the video.
+		 * Also resizes the canvas to the dimensions of the video and enables the drawing on the canvas.
+		 */
 		domReady: function() {
 		this.video = this.$.video;
 		this.video.onended = this.ended.bind(this);
@@ -199,7 +219,7 @@ The set of parameters is subject of change since all the properties of this comp
 		this.canvas.freeDrawingBrush.color = '#FFF000';
 		var pauseSignal = this.pauseClick.bind(this);
 		var sendAnnotationFunction = this.sendAnnotation.bind(this);
-		var clearTimeoutFunction = this.clearTimeoutP.bind(this);
+		var clearTimeoutFunction = this.clearTimeoutFunction.bind(this);
 		this.canvas.on('touch:drag', function(){
 										console.log("touch start");
 											});
@@ -213,7 +233,6 @@ The set of parameters is subject of change since all the properties of this comp
 											});
 		
 								
-		//this.resizeCanvas();
 		},
 		
 		/**
@@ -236,16 +255,20 @@ The set of parameters is subject of change since all the properties of this comp
 		},
 		pause: function() {
 			this.video.pause();
-			this.resizeCanvas();
 		},
 		ended: function() {  },
+
+		/**
+		 * timeupdate event is fired ever 250 ms in the chrome browser.
+		 * We use this to update the value of the slider at sevianno-video-controller component, and also check for
+		 * annotations at the sevianno-annotation-list component.
+		 */
 		timeupdate: function() {
 			if(this.video.duration <= 0) return;
 			var time = this.video.currentTime;
 			var value = (100 / this.video.duration) * this.video.currentTime;
 			var timeValue = {time:this.video.currentTime,
 							 sliderValue:value };
-			this.resizeCanvas();
 			this.fire('core-signal', { name: 'timeupdate', data: timeValue });
 		},
 		progress: function() {  
@@ -254,6 +277,9 @@ The set of parameters is subject of change since all the properties of this comp
 			var progress_amount = (buffered_end / this.video.duration) * 100;
 			this.fire('core-signal', { name: 'progress-amount', data: progress_amount });
 		},
+		/**
+		 * This is used to resize the canvas at the begining of the video play.
+		 */
 		canplay: function() {
 			this.resizeCanvas();
 			this.fire('core-signal', { name: 'canplay' });
@@ -310,7 +336,11 @@ The set of parameters is subject of change since all the properties of this comp
 		// when the source of the video changes
 			this.reset();
 		},
-			
+
+		/**
+		 * This method is called to show an annotation.
+		 * It shows the annotation and also does not change the state of the video.
+		 */
 		showAnnotation: function(e, detail, sender) {
 			this.time = detail.time;
 			this.jsonAnnotation = detail.jsonvideo;
@@ -336,6 +366,10 @@ The set of parameters is subject of change since all the properties of this comp
 			//this.timer = null;
 			
 		},
+
+		/**
+		 * When attributes change we resize the canvas to the new attributes.
+		 */
 		reset: function() {
 				this.resizeCanvas();
 		},
@@ -352,6 +386,10 @@ The set of parameters is subject of change since all the properties of this comp
 			this.video.pause();
 			}
 		},
+
+			/**
+			 * Send annotation is used to fire an signal that a new annotation was added.
+			 */
 		sendAnnotation: function() {
 			var valuePercentage = (this.video.currentTime / this.video.duration)*100 ;
 			var annotation;
@@ -364,6 +402,9 @@ The set of parameters is subject of change since all the properties of this comp
 			};
 			this.fire('core-signal', { name: 'add-annotation', data: annotation });
 		},
+			/**
+			 * ResizeCanvas resizes the canvas dimensions as well as the drawing that is already in it.
+			 */
 		resizeCanvas: function(){		
 			if (this.canvas) {
 				var factor = this.video.offsetWidth/(this.canvas.getWidth());
@@ -396,6 +437,9 @@ The set of parameters is subject of change since all the properties of this comp
 			this.canvas.freeDrawingBrush.width = 15;
 			this.canvas.freeDrawingBrush.color = '#FFF000';	
 		},
+			/**
+			 * Cleans the canvas
+			 */
 		clearCanvas: function(){
 			this.canvas.clear();
 		},
@@ -404,9 +448,20 @@ The set of parameters is subject of change since all the properties of this comp
 			this.canvas.freeDrawingBrush.width = 10;
 			this.canvas.freeDrawingBrush.color = '#FF0000';
 		},
-		clearTimeoutP: function(){
+			/**
+			 * ClearTimeoutFunction is used to clear the timeout if one is active.
+			 * Its usecase is: when an annotation is shown and the video will start to play in few seconds. If user
+			 * starts drawing another annotation, the cleartimeout will cancel this timeout.
+			 */
+		clearTimeoutFunction: function(){
 			clearTimeout(this.timer);
 		},
+
+			/**
+			 * Converts the time of the video to SMPTE format
+			 * @param currentTime
+			 * @returns {string} which is the SMPTE string.
+			 */
 		toSMPTE: function(currentTime) {
 			var fps = 25;
 			var frameNumber = Math.round(Number(currentTime * fps));
